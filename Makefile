@@ -1,20 +1,16 @@
 CC = g++
 RM = rm -rf
 
-BGEMU = BGEmu
-GAMELIB = libgame.a
+GAMELIB = libjgame.a
 LIBS = -lz `sdl2-config --libs`
 CXXFLAGS = -Wall -Werror -g -O0 `sdl2-config --cflags`
 SUBDIR = \
-animations \
-archives \
-game \
+audio \
 graphics \
-gui \
-resources \
 shell \
 streams \
-support
+support \
+timers
 
 OUTDIR = ./bin
 DIR_OBJ = ./obj
@@ -25,14 +21,9 @@ OBJS = $(addprefix $(DIR_OBJ)/, $(SRCS:cpp=o)) # obj/xxx.o obj/folder/xxx .o
 INC_DIRS = -I./ $(addprefix -I, $(SUBDIR))
 
 #PHONY := all
-all: $(BGEMU) 
+all: $(GAMELIB) 
 
-tests: PathFindTest RandTest
-
-PHONY := $(BGEMU) $(GAMELIB)
-$(BGEMU):  bgemu.cpp $(GAMELIB)
-	mkdir -p $(OUTDIR)
-	$(CC) -o $(OUTDIR)/$@ bgemu.cpp $(DIR_OBJ)/$(GAMELIB) $(LIBS) $(INC_DIRS) $(CXXFLAGS) $(LDFLAGS)
+PHONY := $(GAMELIB)
 	
 $(GAMELIB): $(OBJS)
 	ar rcu $(DIR_OBJ)/$(GAMELIB) $(OBJS)
@@ -41,14 +32,6 @@ $(GAMELIB): $(OBJS)
 $(DIR_OBJ)/%.o: %.cpp $(INCS)
 	mkdir -p $(@D)
 	$(CC) -o $@ $(CXXFLAGS) -c $< $(INC_DIRS)
-
-PathFindTest: $(GAMELIB) tests/PathFindTest.cpp
-	mkdir -p $(OUTDIR)
-	$(CC) -o $(OUTDIR)/$@ tests/PathFindTest.cpp $(LIBS) $(DIR_OBJ)/$(GAMELIB) $(INC_DIRS) $(CXXFLAGS) $(LDFLAGS)
-
-RandTest: $(GAMELIB) tests/RandTest.cpp
-	mkdir -p $(OUTDIR)
-	$(CC) -o $(OUTDIR)/$@ tests/RandTest.cpp $(LIBS) $(DIR_OBJ)/$(GAMELIB) $(INC_DIRS) $(CXXFLAGS) $(LDFLAGS)	
 
 PHONY += clean
 clean:

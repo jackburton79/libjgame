@@ -3,8 +3,10 @@
 #include "RectUtils.h"
 
 #include <assert.h>
+#include <cstdlib>
+#include <cstring>
 #include <stdexcept>
-#include <stdlib.h>
+
 
 Polygon::Polygon()
 	:

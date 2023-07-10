@@ -9,8 +9,8 @@
 #include "Timer.h"
 
 #include "Log.h"
-#include "ResManager.h"
 
+#include <iostream>
 #include <sstream>
 #include <sys/time.h>
 
@@ -236,10 +236,6 @@ GameTimer::Expired() const
 void
 GameTimer::Add(const char* name, uint32 expirationTime)
 {
-	std::string expiration = IDTable::GameTimeAt(expirationTime);
-	std::cout << "Added timer '" << name << "' which expires in ";
-	std::cout << expiration << "(" << std::dec << expirationTime;
-	std::cout << ")" << std::endl;
 	timer_map::iterator i = sTimers.find(name);
 	if (i != sTimers.end())
 		i->second->SetExpiration(expirationTime);
