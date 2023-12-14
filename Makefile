@@ -12,7 +12,7 @@ streams \
 support \
 timers
 
-OUTDIR = ./bin
+OUTDIR = ./lib
 DIR_OBJ = ./obj
 INCS = $(wildcard *.h $(foreach fd, $(SUBDIR), $(fd)/*.h))
 SRCS = $(wildcard /*.cpp $(foreach fd, $(SUBDIR), $(fd)/*.cpp))
