@@ -26,8 +26,9 @@ all: $(GAMELIB)
 PHONY := $(GAMELIB)
 	
 $(GAMELIB): $(OBJS)
-	ar rcu $(DIR_OBJ)/$(GAMELIB) $(OBJS)
-	ranlib $(DIR_OBJ)/$(GAMELIB)
+	mkdir -p $(OUTDIR)
+	ar rcu $(OUTDIR)/$(GAMELIB) $(OBJS)
+	ranlib $(OUTDIR)/$(GAMELIB)
 
 $(DIR_OBJ)/%.o: %.cpp $(INCS)
 	mkdir -p $(@D)
