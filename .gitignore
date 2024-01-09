@@ -1,8 +1,5 @@
 .*
 *.o
 *.d
-data
-Chitin.key
-BGEmu
-tests/PathFindTest
-tests/RandTest
+lib/*
+obj/*
