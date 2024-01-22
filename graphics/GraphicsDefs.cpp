@@ -50,7 +50,7 @@ point::OffsetBy(const sint16& offsetX, const sint16& offsetY)
 
 
 point
-point::OffsetByCopy(const sint16& offsetX, const sint16& offsetY)
+point::OffsetByCopy(const sint16& offsetX, const sint16& offsetY) const
 {
 	GFX::point newPoint = *this;
 	newPoint.x += offsetX;
@@ -150,7 +150,7 @@ rect::OffsetBy(const sint16& offsetX, const sint16& offsetY)
 
 
 GFX::rect
-rect::OffsetByCopy(const sint16& offsetX, const sint16& offsetY)
+rect::OffsetByCopy(const sint16& offsetX, const sint16& offsetY) const
 {
 	GFX::rect newRect = *this;
 	newRect.x += offsetX;
@@ -169,12 +169,21 @@ rect::OffsetTo(const sint16& offsetX, const sint16& offsetY)
 
 
 GFX::rect
-rect::OffsetToCopy(const sint16& offsetX, const sint16& offsetY)
+rect::OffsetToCopy(const sint16& offsetX, const sint16& offsetY) const
 {
 	GFX::rect newRect = *this;
 	newRect.x = offsetX;
 	newRect.y = offsetY;
 	return newRect;
+}
+
+
+GFX::rect&
+rect::CenterIn(const GFX::rect& rect)
+{
+	x = (rect.w - x) / 2;
+	y = (rect.h - y) / 2;
+	return *this;
 }
 
 

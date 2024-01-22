@@ -10,7 +10,6 @@
 #include "GraphicsEngine.h"
 #include "Log.h"
 #include "Polygon.h"
-#include "RectUtils.h"
 
 #include <algorithm>
 #include <cmath>

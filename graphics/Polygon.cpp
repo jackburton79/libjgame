@@ -1,6 +1,5 @@
 #include "Bitmap.h"
 #include "Polygon.h"
-#include "RectUtils.h"
 
 #include <assert.h>
 #include <cstdlib>
