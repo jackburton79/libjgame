@@ -369,7 +369,7 @@ void
 Bitmap::BlitTo(Bitmap* target, const GFX::point& where) const
 {
 	GFX::rect sourceRect = { 0, 0, Width(), Height() };
-	GFX::rect destRect = offset_rect(sourceRect, where.x, where.y);
+	GFX::rect destRect = sourceRect.OffsetByCopy(where.x, where.y);
 	GraphicsEngine::BlitBitmap(this, &sourceRect, target, &destRect);
 }
 

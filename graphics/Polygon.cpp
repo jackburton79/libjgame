@@ -130,16 +130,16 @@ void
 Polygon::OffsetBy(int32 x, int32 y)
 {
 	for (int32 v = 0; v < fCount; v++)
-		fPoints[v] = offset_point(fPoints[v], x, y);
+		fPoints[v].OffsetBy( x, y);
 
-	fFrame = offset_rect(fFrame, x, y);
+	fFrame.OffsetBy(x, y);
 }
 
 
 bool
 Polygon::Contains(const int16 x, const int16 y) const
 {
-	if (!rect_contains(fFrame, x, y))
+	if (!fFrame.Contains(x, y))
 		return false;
 	bool contains = false;
 	for (int32 i = 0, j = fCount - 1; i < fCount; j = i++) {

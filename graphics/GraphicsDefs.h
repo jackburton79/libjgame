@@ -53,6 +53,10 @@ public:
 
 	int16 x;
 	int16 y;
+
+	GFX::point& OffsetBy(const sint16& x, const sint16& y);
+	GFX::point OffsetByCopy(const sint16& x, const sint16& y);
+
 	void Print() const;
 };
 
@@ -74,6 +78,12 @@ public:
 	GFX::point LeftTop() const;
 	GFX::point Center() const;
 	GFX::point RightBottom() const;
+	bool Contains(const int16& x, const int16& y) const;
+	bool Intersects(const GFX::rect &rectB) const;
+	GFX::rect& OffsetBy(const sint16& x, const sint16& y);
+	GFX::rect OffsetByCopy(const sint16& x, const sint16& y);
+	GFX::rect& OffsetTo(const sint16& x, const sint16& y);
+	GFX::rect OffsetToCopy(const sint16& x, const sint16& y);
 
 	void Print() const;
 };

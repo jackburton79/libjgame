@@ -40,6 +40,25 @@ point::point(int16 _x, int16 _y)
 }
 
 
+point&
+point::OffsetBy(const sint16& offsetX, const sint16& offsetY)
+{
+	x += offsetX;
+	y += offsetY;
+	return *this;
+}
+
+
+point
+point::OffsetByCopy(const sint16& offsetX, const sint16& offsetY)
+{
+	GFX::point newPoint = *this;
+	newPoint.x += offsetX;
+	newPoint.y += offsetY;
+	return newPoint;
+}
+
+
 void
 point::Print() const
 {
@@ -98,6 +117,64 @@ GFX::point
 rect::RightBottom() const
 {
 	return GFX::point(x + w, y + h);
+}
+
+
+bool
+rect::Contains(const int16& pointX, const int16& pointY) const
+{
+	if (pointX >= x && pointX <= x + w
+			&& pointY >= y && pointY <= y + h)
+		return true;
+	return false;
+}
+
+
+bool
+rect::Intersects(const GFX::rect &rectB) const
+{
+	return !(x > rectB.x + rectB.w
+			|| y > rectB.y + rectB.h
+			|| x + w < rectB.x
+			|| y + h < rectB.y);
+}
+
+
+GFX::rect&
+rect::OffsetBy(const sint16& offsetX, const sint16& offsetY)
+{
+	x += offsetX;
+	y += offsetY;
+	return *this;
+}
+
+
+GFX::rect
+rect::OffsetByCopy(const sint16& offsetX, const sint16& offsetY)
+{
+	GFX::rect newRect = *this;
+	newRect.x += offsetX;
+	newRect.y += offsetY;
+	return newRect;
+}
+
+
+GFX::rect&
+rect::OffsetTo(const sint16& offsetX, const sint16& offsetY)
+{
+	x = offsetX;
+	y = offsetY;
+	return *this;
+}
+
+
+GFX::rect
+rect::OffsetToCopy(const sint16& offsetX, const sint16& offsetY)
+{
+	GFX::rect newRect = *this;
+	newRect.x = offsetX;
+	newRect.y = offsetY;
+	return newRect;
 }
 
 
