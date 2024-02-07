@@ -3,17 +3,17 @@
 
 #include "Bitmap.h"
 #include "GraphicsDefs.h"
+#include "SDL.h"
 
 #include <vector>
-#include "SDL.h"
+
+
 class Bitmap;
-class Listener;
 class GraphicsEngine {
 public:
 	static GraphicsEngine* Get();
 	static bool Initialize();
 	static void Destroy();
-
 
 	enum MASK_VALUES {
 		MASK_NO_MASK = 0,
@@ -73,8 +73,6 @@ private:
 	GFX::rect fOldRect;
 	uint16 fOldDepth;
 	uint16 fOldFlags;
-
-	std::vector<Listener*> fListeners;
 	
 	GraphicsEngine();
 	~GraphicsEngine();
