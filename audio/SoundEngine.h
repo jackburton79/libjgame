@@ -20,7 +20,7 @@ public:
 	uint16 SampleRate() const;
 	uint8* Data();
 
-	uint16 ConsumeSamples(uint8* destBuffer, uint16 numSamples);
+	uint16 ConsumeSamples(uint8* destBuffer, uint32 numSamples);
 	void AddSample(sint16 sample);
 
 	uint32 AvailableData() const;

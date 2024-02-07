@@ -154,7 +154,7 @@ void
 SoundEngine::MixAudio(void *castToThis, Uint8 *stream, int numBytes)
 {
 	SoundEngine* engine = reinterpret_cast<SoundEngine*>(castToThis);
-	engine->Buffer()->ConsumeSamples((uint8*)stream, (uint16)numBytes);
+	engine->Buffer()->ConsumeSamples(reinterpret_cast<uint8*>(stream), static_cast<uint32>(numBytes));
 }
 
 
@@ -169,7 +169,7 @@ SoundBuffer::SoundBuffer(bool stereo, bool bit16, uint16 sampleRate, uint32 buff
 	fBufferPos(0),
 	fConsumedPos(0)
 {
-	fData = (uint8*)calloc(1, bufferLen);
+	fData = reinterpret_cast<uint8*>(calloc(1, bufferLen));
 }
 
 
@@ -222,7 +222,7 @@ SoundBuffer::AddSample(sint16 sample)
 
 
 uint16
-SoundBuffer::ConsumeSamples(uint8* destBuffer, uint16 numSamples)
+SoundBuffer::ConsumeSamples(uint8* destBuffer, uint32 numSamples)
 {
 	uint32 numRequested = (uint32)numSamples;
 	uint32 numAvailable = std::min(numRequested, AvailableData());
