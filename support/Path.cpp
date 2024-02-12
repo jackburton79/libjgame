@@ -29,7 +29,7 @@ is_absolute_path(const char *path)
 	return (path && path[0] == '/');
 }
 
-
+using namespace Storage;
 
 //! Creates an uninitialized BPath object.
 Path::Path()

@@ -7,6 +7,8 @@
 
 #include "SupportDefs.h"
 
+namespace Storage {
+
 class Path {
 public:
 							Path();
@@ -42,5 +44,7 @@ private:
 			char*			fName;
 			status_t		fCStatus;
 };
+
+}; // namespace Storage
 
 #endif	// _PATH_H

@@ -3,12 +3,13 @@
 
 #include <assert.h>
 #include <algorithm>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <dirent.h>
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
+
 #include <string>
-#include <string.h>
 
 #include <iostream>
 
@@ -45,9 +46,9 @@ fopen_case(const char* filename, const char* flags)
 	assert(filename != NULL);
 	assert(::strlen(filename) > 1);
 
-	Path normalizedFileName(filename);
+	Storage::Path normalizedFileName(filename);
 	std::string newPath("/");
-	char* start = (char*)normalizedFileName.String() + 1;
+	char* start = const_cast<char*>(normalizedFileName.String()) + 1;
 	char* end = start + ::strlen(normalizedFileName.String());
 	size_t where = 0;
 	while ((where = ::strcspn(start, "/")) > 0) {
