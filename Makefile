@@ -14,11 +14,14 @@ timers
 
 OUTDIR = ./lib
 DIR_OBJ = ./obj
-INCS = $(wildcard *.h $(foreach fd, $(SUBDIR), $(fd)/*.h))
 SRCS = $(wildcard /*.cpp $(foreach fd, $(SUBDIR), $(fd)/*.cpp))
 NODIR_SRC = $(notdir $(SRCS))
 OBJS = $(addprefix $(DIR_OBJ)/, $(SRCS:cpp=o)) # obj/xxx.o obj/folder/xxx .o
 INC_DIRS = -I./ $(addprefix -I, $(SUBDIR))
+
+DEP = $(OBJS:%.o=%.d)
+
+-include $(DEP)
 
 #PHONY := all
 all: $(GAMELIB) 
@@ -27,12 +30,12 @@ PHONY := $(GAMELIB)
 	
 $(GAMELIB): $(OBJS)
 	mkdir -p $(OUTDIR)
-	ar rcu $(OUTDIR)/$(GAMELIB) $(OBJS)
+	ar rc $(OUTDIR)/$(GAMELIB) $(OBJS)
 	ranlib $(OUTDIR)/$(GAMELIB)
 
-$(DIR_OBJ)/%.o: %.cpp $(INCS)
+$(DIR_OBJ)/%.o: %.cpp
 	mkdir -p $(@D)
-	$(CC) -o $@ $(CXXFLAGS) -c $< $(INC_DIRS)
+	$(CC) -o $@ $(CXXFLAGS) -MMD -c $< $(INC_DIRS)
 
 PHONY += clean
 clean:
