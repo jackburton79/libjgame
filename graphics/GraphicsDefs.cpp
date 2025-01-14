@@ -82,8 +82,12 @@ operator-(const point& pointA, const point& pointB)
 
 // GFX::rect
 rect::rect()
+	:
+	x(0),
+	y(0),
+	w(0),
+	h(0)
 {
-	x = y = w = h = 0;
 }
 
 
