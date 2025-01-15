@@ -13,21 +13,22 @@
 
 #include <iostream>
 
-const char*
-trim(char* string)
-{
-	while (isspace(*string))
-		string++;
 
-	ssize_t length = ::strlen(string);
-	char* endOfString = string + length - 1;
+const char*
+trim(const char* string)
+{
+	char* newStringStart = const_cast<char*>(string);
+	while (isspace(*newStringStart))
+		newStringStart++;
+
+	char* endOfString = newStringStart + ::strlen(newStringStart) - 1;
 	while (isspace(*endOfString))
 		endOfString--;
 
 	endOfString++;
 	*endOfString  = '\0';
 
-	return string;
+	return newStringStart;
 }
 
 

@@ -1,14 +1,14 @@
 #ifndef __UTILS_H
 #define __UTILS_H
 
-#include <stdio.h>
-#include <string>
+#include <cstdio>
 
 #include "SupportDefs.h"
 
-// trims in place
-const char* trim(char* string);
+// Does not touch the passed string
+const char* trim(const char* string);
 
+// Replaces "\" to "/"
 void path_dos_to_unix(char* path);
 
 // Opens a file case insensitively on a case sensitive FS
