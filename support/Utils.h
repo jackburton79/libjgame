@@ -6,7 +6,7 @@
 #include "SupportDefs.h"
 
 // Does not touch the passed string
-const char* trim(const char* string);
+const char* trimmed(const char* string);
 
 // Replaces "\" to "/"
 void path_dos_to_unix(char* path);

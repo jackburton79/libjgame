@@ -15,7 +15,7 @@
 
 
 const char*
-trim(const char* string)
+trimmed(const char* string)
 {
 	char* newStringStart = const_cast<char*>(string);
 	while (isspace(*newStringStart))
