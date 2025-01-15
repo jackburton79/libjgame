@@ -18,7 +18,7 @@ StringStream::StringStream(const char* string)
 }
 
 
-StringStream::StringStream(std::string string)
+StringStream::StringStream(const std::string& string)
 	:
 	MemoryStream(string.length() + 1)
 {

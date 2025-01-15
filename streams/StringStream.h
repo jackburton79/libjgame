@@ -15,7 +15,7 @@
 class StringStream: public MemoryStream {
 public:
 	StringStream(const char* string);
-	StringStream(std::string string);
+	StringStream(const std::string& string);
 	virtual ~StringStream();
 };
 
