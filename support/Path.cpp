@@ -142,9 +142,11 @@ Path::SetTo(const char* path, const char* leaf, bool normalize)
 		// normalize the path, if necessary, otherwise just set it
 		if (error == 0) {
 			if (normalize) {
-				char realPath[PATH_MAX];
-				if (realpath(newPath, realPath) != NULL) {
-					return SetTo(realPath);
+				char* resolvedPath = realpath(newPath, NULL);
+				if (realPath != NULL) {
+					error = SetTo(resolvedPath);
+					::free(resolvedPath);
+					return error;
 				} else
 					error = errno;
 			} else
