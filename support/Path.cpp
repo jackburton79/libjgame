@@ -143,7 +143,7 @@ Path::SetTo(const char* path, const char* leaf, bool normalize)
 		if (error == 0) {
 			if (normalize) {
 				char* resolvedPath = realpath(newPath, NULL);
-				if (realPath != NULL) {
+				if (resolvedPath != NULL) {
 					error = SetTo(resolvedPath);
 					::free(resolvedPath);
 					return error;
