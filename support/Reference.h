@@ -3,9 +3,11 @@
  * Copyright 2014-2015, Stefano Ceccherini
  * Distributed under the terms of the MIT License.
  */
- 
+
 #ifndef REFERENCE_H_
 #define REFERENCE_H_
+
+#include <cstddef>
 
 class Referenceable;
 template <typename T = Referenceable>
@@ -21,14 +23,14 @@ public:
 		if (fTarget != NULL)
 			fTarget->Acquire();
 	}
-	
+
 	Reference(const Reference<T>& ref)
 		:
 		fTarget(NULL)
 	{
-		SetTo(ref.Target());	
+		SetTo(ref.Target());
 	};
-	
+
 	~Reference() {
 		Unset();
 	};
@@ -40,39 +42,39 @@ public:
 	void SetTo(T* target) {
 		if (target != NULL)
 			target->Acquire();
-		
+
 		Unset();
-	
+
 		fTarget = target;
 	}
-	
+
 	void Unset() {
 		if (fTarget != NULL) {
 			fTarget->Release();
 			fTarget = NULL;
 		}
 	}
-	
+
 	T* operator*() {
 		return *fTarget;
 	}
-	
+
 	Reference& operator=(const Reference<T>& ref) {
 		SetTo(ref.Target());
 
 		return *this;
 	};
-	
+
 	Reference& operator=(T* other) {
 		SetTo(other);
 		return *this;
 	}
-	
+
 	template <typename O>
 	Reference& operator=(O* other) {
-		SetTo(other->Target());	
+		SetTo(other->Target());
 	}
-	
+
 	bool operator==(const Reference<T>& other) const
 	{
 		return fTarget == other.fTarget;

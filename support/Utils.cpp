@@ -2,7 +2,6 @@
 #include "Utils.h"
 
 #include <assert.h>
-#include <algorithm>
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
@@ -11,7 +10,6 @@
 
 #include <string>
 
-#include <iostream>
 
 
 const char*
@@ -110,7 +108,7 @@ get_unquoted_string(char* dest, char* source, size_t size)
 	return nameEnd - source;
 }
 
-		
+
 bool
 is_bit_set(uint32 value, int bitPos)
 {
