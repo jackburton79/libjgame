@@ -1,7 +1,6 @@
 #include "MemoryStream.h"
 
 
-#include <iostream>
 #include <string.h>
 
 MemoryStream::MemoryStream(const uint8 *data, size_t size, bool owns)
@@ -104,7 +103,7 @@ MemoryStream::Seek(off_t where, int whence)
 		default:
 			break;
 	}
-	
+
 	return fPosition;
 }
 
@@ -146,9 +145,9 @@ MemoryStream*
 MemoryStream::Adopt()
 {
 	MemoryStream* newStream = new MemoryStream(fData, Size(), true);
-	
+
 	fData = NULL;
 	fSize = 0;
-	
+
 	return newStream;
 }
