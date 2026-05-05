@@ -3,7 +3,20 @@ RM = rm -rf
 
 GAMELIB = libjgame.a
 LIBS = -lz `sdl2-config --libs`
-CXXFLAGS = -Wall -Werror -g -O0 `sdl2-config --cflags`
+CXXFLAGS = -Wall -Werror `sdl2-config --cflags`
+
+DEBUG ?= 0
+# DEBUG=TRUE or DEBUG=1
+ifeq ($(DEBUG),1)
+	DEBUG := TRUE
+endif
+
+ifneq ($(DEBUG),TRUE)
+	CXXFLAGS += -O3
+else
+	CXXFLAGS += -g -O0
+endif
+
 SUBDIR = \
 audio \
 graphics \
@@ -24,10 +37,10 @@ DEP = $(OBJS:%.o=%.d)
 -include $(DEP)
 
 #PHONY := all
-all: $(GAMELIB) 
+all: $(GAMELIB)
 
 PHONY := $(GAMELIB)
-	
+
 $(GAMELIB): $(OBJS)
 	mkdir -p $(OUTDIR)
 	ar rc $(OUTDIR)/$(GAMELIB) $(OBJS)
