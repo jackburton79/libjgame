@@ -3,9 +3,9 @@
 
 #include "Bitmap.h"
 #include "GraphicsDefs.h"
+
 #include "SDL.h"
 
-#include <vector>
 
 
 class Bitmap;
@@ -57,9 +57,9 @@ public:
 
 	void SetWindowCaption(const char* caption);
 
-	Bitmap* ScreenBitmap();	
+	Bitmap* ScreenBitmap();
 	void Update();
-	
+
 	void SetFade(uint16 value);
 
 private:
@@ -73,7 +73,7 @@ private:
 	GFX::rect fOldRect;
 	uint16 fOldDepth;
 	uint16 fOldFlags;
-	
+
 	GraphicsEngine();
 	~GraphicsEngine();
 };
