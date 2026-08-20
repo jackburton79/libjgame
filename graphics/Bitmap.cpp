@@ -150,8 +150,8 @@ Bitmap::SetAlpha(uint8 value, bool on)
 uint32
 Bitmap::GetPixel(uint16 x, uint16 y) const
 {
-    int bpp = fSurface->format->BytesPerPixel;
-    Uint8 *p = (Uint8*)fSurface->pixels + y * fSurface->pitch + x * bpp;
+	int bpp = fSurface->format->BytesPerPixel;
+	Uint8 *p = (Uint8*)fSurface->pixels + y * fSurface->pitch + x * bpp;
 
 	switch(bpp) {
 		case 1:
@@ -471,9 +471,15 @@ Bitmap::BitsPerPixel() const
 }
 
 
+void
+Bitmap::GetRGBColor(uint32 color, uint8& r, uint8& g, uint8& b)
+{
+	SDL_GetRGB(color, fSurface->format, &r, &g, &b);
+}
+
 
 uint32
-Bitmap::MapColor(const uint8 r, const uint8 g, const uint8 b)
+Bitmap::MapRGBColor(const uint8 r, const uint8 g, const uint8 b)
 {
 	return SDL_MapRGB(fSurface->format, r, g, b);
 }

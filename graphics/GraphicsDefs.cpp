@@ -300,7 +300,7 @@ Palette::Dump(const char* fileName) const
 	int c = 0;
 	for (int y = 0; y < bitmap->Height(); y += blockSize) {
 		for (int x = 0; x < bitmap->Width(); x += blockSize) {
-			uint32 color = bitmap->MapColor(colors[c].r, colors[c].g, colors[c].b);
+			uint32 color = bitmap->MapRGBColor(colors[c].r, colors[c].g, colors[c].b);
 			FillBlock(bitmap, x, y, color);
 			c++;
 		}

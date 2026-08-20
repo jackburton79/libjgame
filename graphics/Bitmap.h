@@ -74,7 +74,8 @@ public:
 	// Blitting
 	void BlitTo(Bitmap* target, const GFX::point& where) const;
 
-	uint32 MapColor(const uint8 r, const uint8 g, const uint8 b);
+	void GetRGBColor(uint32 color, uint8& r, uint8& g, uint8& b);
+	uint32 MapRGBColor(const uint8 r, const uint8 g, const uint8 b);
 
 	// Flip / Mirror
 	Bitmap* GetMirrored() const;
