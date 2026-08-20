@@ -260,16 +260,6 @@ Palette::operator=(const Palette& palette)
 
 
 void
-Palette::ModColor(uint8 index, uint8 mod)
-{
-	colors[index].r = colors[mod].r;
-	colors[index].g = colors[mod].g;
-	colors[index].b = colors[mod].b;
-	//colors[index].a = colors[index].a + mod;
-}
-
-
-void
 Palette::Dump() const
 {
 	std::cout << "Palette:" << std::endl;

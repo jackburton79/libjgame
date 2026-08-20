@@ -30,7 +30,6 @@ public:
 
 	Palette& operator=(const Palette& palette);
 
-	void ModColor(uint8 index, uint8 mod);
 	void Dump() const;
 	void Dump(const char* fileName) const;
 	Color colors[256];
