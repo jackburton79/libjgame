@@ -49,7 +49,7 @@ Timer::Set(const char* name, uint32 delay)
 Timer*
 Timer::Get(const char* name)
 {
-	timer_map::iterator i = sNamedTimers.find(name);
+	auto i = sNamedTimers.find(name);
 	if (i == sNamedTimers.end())
 		return NULL;
 	return i->second;
@@ -234,7 +234,7 @@ GameTimer::Expired() const
 void
 GameTimer::Add(const char* name, uint32 expirationTime)
 {
-	timer_map::iterator i = sTimers.find(name);
+	auto i = sTimers.find(name);
 	if (i != sTimers.end())
 		i->second->SetExpiration(expirationTime);
 	else
@@ -258,7 +258,7 @@ GameTimer::Remove(const char* name)
 GameTimer*
 GameTimer::Get(const char* name)
 {
-	std::map<std::string, GameTimer*>::const_iterator i = sTimers.find(name);
+	auto i = sTimers.find(name);
 	if (i == sTimers.end())
 		return NULL;
 
@@ -318,7 +318,7 @@ GameTimer::HourOfDay()
 bool
 GameTimer::IsDayTime()
 {
-	return (HourOfDay() > 6) && (HourOfDay() < 20);
+	return HourOfDay() > 6 && HourOfDay() < 20;
 }
 
 
@@ -329,7 +329,7 @@ GameTimer::GameTimeString()
 	// returns the in-game time as a string (in a 24 hour format)
 	char timeString[64];
 	::snprintf(timeString, sizeof(timeString), "%02u:%02u:%02u",
-			   HourOfDay(), Minutes() % 60, Seconds() % 60);
+				HourOfDay(), Minutes() % 60, Seconds() % 60);
 	return timeString;
 }
 
@@ -366,6 +366,7 @@ GameTimer::AdvanceTime(uint32 seconds)
 {
 	sGameTime += seconds;
 }
+
 
 /* static */
 void
