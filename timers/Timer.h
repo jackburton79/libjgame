@@ -12,9 +12,6 @@
 #include <map>
 #include <string>
 
-enum timer_type {
-	TIMER_GLOBAL = 0
-};
 
 typedef void (*timer_function)(void* parameter);
 
