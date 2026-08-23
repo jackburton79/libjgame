@@ -19,6 +19,7 @@ typedef void (*timer_function)(void* parameter);
 class Timer {
 public:
 	static bool Initialize();
+	static void TearDown();
 	static Timer* Set(const char* name, uint32 delay);
 	static Timer* Get(const char* name);
 

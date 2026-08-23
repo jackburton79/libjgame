@@ -37,6 +37,17 @@ Timer::Initialize()
 
 
 /* static */
+void
+Timer::TearDown()
+{
+	for (auto timer : sNamedTimers) {
+		delete timer.second;
+	}
+	sNamedTimers.clear();
+}
+
+
+/* static */
 Timer*
 Timer::Set(const char* name, uint32 delay)
 {
