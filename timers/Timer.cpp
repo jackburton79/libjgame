@@ -17,6 +17,7 @@
 
 Timer::timer_map Timer::sNamedTimers;
 
+static std::map<SDL_TimerID, Timer::Functor*> sPeriodicTimers;
 
 Timer::Timer(uint32 delay)
 	:
@@ -44,6 +45,12 @@ Timer::TearDown()
 		delete timer.second;
 	}
 	sNamedTimers.clear();
+
+	for (auto [id, functor] : sPeriodicTimers) {
+		delete functor;
+	}
+	sPeriodicTimers.clear();
+
 }
 
 
@@ -122,8 +129,6 @@ periodic_timer_callback(uint32 interval, void* castToFunctor)
 
 	SDL_PushEvent(&event);
 
-	// TODO: we are leaking the functor here
-
 	return interval;
 }
 
@@ -144,6 +149,7 @@ Timer::AddPeriodicTimer(uint32 interval, timer_function func, void* parameter)
 {
 	Functor* functor = new Functor(func, parameter);
 	SDL_TimerID id = SDL_AddTimer(interval, periodic_timer_callback, (void*)functor);
+	sPeriodicTimers[id] = functor;
 	return id;
 }
 
@@ -152,7 +158,12 @@ void
 Timer::RemovePeriodicTimer(int id)
 {
 	SDL_RemoveTimer(id);
+	auto t = sPeriodicTimers.find(id);
+	if (t != sPeriodicTimers.end())
+		delete t->second;
+	sPeriodicTimers.erase(t);
 }
+
 
 /* static */
 uint32
