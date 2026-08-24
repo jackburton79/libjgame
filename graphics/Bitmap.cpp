@@ -276,31 +276,34 @@ Bitmap::StrokePolygon(const Polygon& polygon, const uint32 color,
 
 
 void
-Bitmap::FillPolygon(const Polygon& polygon, const uint32 color)
+Bitmap::FillPolygon(const Polygon& polygon, uint32 color)
 {
+	const auto frame = polygon.Frame();
 	const int32 numPoints = polygon.CountPoints();
-	const sint16 bottom = polygon.Frame().y + polygon.Frame().h;
-	const sint16 top = std::max(polygon.Frame().y, sint16(0));
+	const sint16 top = std::max<sint16>(frame.y, 0);
+	const sint16 bottom = std::min<sint16>(frame.y + frame.h, Height());
 
-	for (uint16 y = top; y < bottom; y++) {
-		std::vector<int32> nodeList;
+	std::vector<int32> nodes;
+	nodes.reserve(numPoints);
+	for (sint16 y = top; y < bottom; y++) {
+		nodes.clear();
+
 		for (int32 p = 0; p < numPoints; p++) {
-			const GFX::point& pointA = polygon.PointAt(p);
-			const GFX::point& pointB = (p == numPoints - 1) ?
-					polygon.PointAt(0) : polygon.PointAt(p + 1);
+			const GFX::point& a = polygon.PointAt(p);
+			const GFX::point& b = polygon.PointAt((p + 1) % numPoints);
 
-			if ((pointA.y < y && pointB.y >= y)
-					|| (pointA.y >= y && pointB.y < y)) {
-				nodeList.push_back(pointA.x + (y - pointA.y)
-						* (pointB.x - pointA.x) / (pointB.y - pointA.y));
+			if ((a.y < y && b.y >= y)
+				|| (a.y >= y && b.y < y)) {
+				nodes.push_back(
+					a.x + ((int64)(y - a.y)
+						* (b.x - a.x))
+						/ (b.y - a.y));
 			}
 		}
 
-		if (nodeList.size() > 1) {
-			std::sort(nodeList.begin(), nodeList.end());
-			for (size_t c = 0; c < nodeList.size(); c+=2) {
-				StrokeLine(nodeList[c], y, nodeList[c + 1], y, color);
-			}
+		std::sort(nodes.begin(), nodes.end());
+		for (size_t i = 0; i + 1 < nodes.size(); i += 2) {
+			StrokeLine(nodes[i], y, nodes[i + 1], y, color);
 		}
 	}
 }
