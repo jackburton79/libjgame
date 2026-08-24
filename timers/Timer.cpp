@@ -92,19 +92,19 @@ static uint32
 oneshot_timer_callback(uint32 interval, void* castToFunctor)
 {
 	Timer::Functor* functor = reinterpret_cast<Timer::Functor*>(castToFunctor);
-	SDL_Event event;
-	SDL_UserEvent userevent;
 
+	SDL_UserEvent userevent;
 	userevent.type = SDL_USEREVENT;
 	userevent.code = 0;
-	userevent.data1 = (void*)functor->Function();
+	userevent.data1 = reinterpret_cast<void*>(functor->Function());
 	userevent.data2 = functor->Parameter();
 
+	SDL_Event event;
 	event.type = SDL_USEREVENT;
 	event.user = userevent;
-
 	SDL_PushEvent(&event);
 
+	// TODO: Is it safe to delete here ?
 	delete functor;
 
 	return 0;
@@ -116,17 +116,15 @@ periodic_timer_callback(uint32 interval, void* castToFunctor)
 {
 	Timer::Functor* functor = reinterpret_cast<Timer::Functor*>(castToFunctor);
 
-	SDL_Event event;
 	SDL_UserEvent userevent;
-
 	userevent.type = SDL_USEREVENT;
 	userevent.code = 0;
-	userevent.data1 = (void*)functor->Function();
+	userevent.data1 = reinterpret_cast<void*>(functor->Function());
 	userevent.data2 = functor->Parameter();
 
+	SDL_Event event;
 	event.type = SDL_USEREVENT;
 	event.user = userevent;
-
 	SDL_PushEvent(&event);
 
 	return interval;
