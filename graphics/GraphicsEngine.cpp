@@ -366,6 +366,18 @@ GraphicsEngine::Update()
 }
 
 
+bool
+GraphicsEngine::SaveScreenshot(const char* path)
+{
+	if (SDL_SaveBMP(fScreen->Surface(), path) != 0) {
+		std::cerr << "GraphicsEngine::SaveScreenshot(" << path << "): "
+			<< SDL_GetError() << std::endl;
+		return false;
+	}
+	return true;
+}
+
+
 void
 GraphicsEngine::SetFade(uint16 value)
 {

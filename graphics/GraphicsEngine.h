@@ -60,6 +60,15 @@ public:
 	Bitmap* ScreenBitmap();
 	void Update();
 
+	// Dumps the current composited frame (fScreen - the same software
+	// surface Update() blits to the screen/renderer, already holding
+	// everything drawn so far this frame) to a BMP file. Meant for
+	// headless/offscreen testing (SDL_VIDEODRIVER=dummy or offscreen) -
+	// see the "Screenshot" console command - where there's no real
+	// display to look at otherwise. Returns false (and logs why) on
+	// failure.
+	bool SaveScreenshot(const char* path);
+
 	void SetFade(uint16 value);
 
 private:
