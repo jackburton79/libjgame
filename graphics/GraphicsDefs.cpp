@@ -182,11 +182,12 @@ rect::OffsetToCopy(const sint16& offsetX, const sint16& offsetY) const
 }
 
 
+// Centers this rect (keeping its own w/h) inside the argument rect
 GFX::rect&
 rect::CenterIn(const GFX::rect& rect)
 {
-	x = (rect.w - x) / 2;
-	y = (rect.h - y) / 2;
+	x = rect.x + (rect.w - w) / 2;
+	y = rect.y + (rect.h - h) / 2;
 	return *this;
 }
 
