@@ -18,6 +18,7 @@
 Timer::timer_map Timer::sNamedTimers;
 
 static std::map<SDL_TimerID, Timer::Functor*> sPeriodicTimers;
+static std::map<SDL_TimerID, Timer::Functor*> sOneShotTimers;
 
 Timer::Timer(uint32 delay)
 	:
@@ -51,6 +52,14 @@ Timer::TearDown()
 	}
 	sPeriodicTimers.clear();
 
+	for (auto [id, functor] : sOneShotTimers) {
+		// Cancel first: without this, a timer whose delay is about to
+		// elapse could still fire (SDL timers run on their own thread)
+		// and call back into a Functor we're about to delete.
+		SDL_RemoveTimer(id);
+		delete functor;
+	}
+	sOneShotTimers.clear();
 }
 
 
@@ -58,6 +67,10 @@ Timer::TearDown()
 Timer*
 Timer::Set(const char* name, uint32 delay)
 {
+	auto existing = sNamedTimers.find(name);
+	if (existing != sNamedTimers.end())
+		delete existing->second;
+
 	sNamedTimers[name] = new Timer(delay);
 	return sNamedTimers[name];
 }
@@ -104,7 +117,14 @@ oneshot_timer_callback(uint32 interval, void* castToFunctor)
 	event.user = userevent;
 	SDL_PushEvent(&event);
 
-	// TODO: Is it safe to delete here ?
+	// Firing normally: stop tracking it before freeing it
+	for (auto i = sOneShotTimers.begin(); i != sOneShotTimers.end(); i++) {
+		if (i->second == functor) {
+			sOneShotTimers.erase(i);
+			break;
+		}
+	}
+
 	delete functor;
 
 	return 0;
@@ -137,6 +157,7 @@ Timer::AddOneShotTimer(uint32 delay, timer_function func, void* parameter)
 {
 	Functor* functor = new Functor(func, parameter);
 	SDL_TimerID id = SDL_AddTimer(delay, oneshot_timer_callback, (void*)functor);
+	sOneShotTimers[id] = functor;
 	return id;
 }
 
