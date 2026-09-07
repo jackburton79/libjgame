@@ -30,6 +30,8 @@ GraphicsEngine::GraphicsEngine()
 GraphicsEngine::~GraphicsEngine()
 {
 	fScreen->Release();
+	if (fSDLTexture != nullptr)
+		SDL_DestroyTexture(fSDLTexture);
 	SDL_Quit();
 }
 
@@ -276,6 +278,9 @@ GraphicsEngine::SetVideoMode(uint16 width, uint16 height, uint16 depth,
 			throw std::runtime_error("Cannot Create Window");
 		}
 	}
+
+	if (fSDLTexture != nullptr)
+		SDL_DestroyTexture(fSDLTexture);
 
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
 	SDL_RenderSetLogicalSize(fSDLRenderer, width, height);
