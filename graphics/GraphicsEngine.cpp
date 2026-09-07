@@ -32,6 +32,10 @@ GraphicsEngine::~GraphicsEngine()
 	fScreen->Release();
 	if (fSDLTexture != nullptr)
 		SDL_DestroyTexture(fSDLTexture);
+	if (fSDLRenderer != nullptr)
+		SDL_DestroyRenderer(fSDLRenderer);
+	if (fSDLWindow != nullptr)
+		SDL_DestroyWindow(fSDLWindow);
 	SDL_Quit();
 }
 
