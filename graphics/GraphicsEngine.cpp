@@ -296,7 +296,10 @@ GraphicsEngine::SetVideoMode(uint16 width, uint16 height, uint16 depth,
 						SDL_TEXTUREACCESS_STREAMING,
 						width, height);
 
-	fScreen = new Bitmap(surface, false);
+	if (fScreen != nullptr)
+		fScreen->Release();
+
+	fScreen = new Bitmap(surface, true);
 	fFlags = flags;
 
 	std::cout << "got ";
