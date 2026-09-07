@@ -211,15 +211,30 @@ GraphicsEngine::BlitBitmapWithMask(const Bitmap* bitmap,
 	if (!mask->Lock())
 		return false;
 
-	uint8* maskPixels = (uint8*)mask->Pixels()
-				+ (maskRect->y * mask->Pitch()) + maskRect->x;
+	uint8* const maskBase = (uint8*)mask->Pixels();
+	const uint32 maskPitch = mask->Pitch();
+	const int maskWidth = (int)mask->Width();
+	const int maskHeight = (int)mask->Height();
 
 	for (uint32 y = yStart; y < bitmap->Height(); y++) {
+		// The mask coordinates (maskRect + iteration offset) can fall outside
+		// the mask bitmap, e.g. when an actor is positioned near or beyond the
+		// area boundary. Clamp every mask access to [0, maskWidth) x
+		// [0, maskHeight) and treat anything outside as fully masked, instead
+		// of reading out of bounds (which segfaults).
+		const int maskY = maskRect->y + (int)(y - yStart);
+		const bool maskRowValid = maskY >= 0 && maskY < maskHeight;
+		const uint8* maskPixels = maskRowValid
+			? maskBase + (uint32)maskY * maskPitch : nullptr;
 		for (uint32 x = xStart; x < bitmap->Width(); x++) {
 			SDL_Rect sourceRect = {0, 0, 1, 1};
 			SDL_Rect destRect = {0, 0, 1, 1};
-			if (maskPixels[x] != MASK_COMPLETELY) {
-				if (maskPixels[x] == MASK_SHADE) {
+			const int maskX = maskRect->x + (int)x;
+			const uint8 maskValue =
+				(maskRowValid && maskX >= 0 && maskX < maskWidth)
+					? maskPixels[maskX] : (uint8)MASK_COMPLETELY;
+			if (maskValue != MASK_COMPLETELY) {
+				if (maskValue == MASK_SHADE) {
 					if (y % 2 != 0 || x % 2 != 0)
 						continue;
 				}
@@ -232,7 +247,6 @@ GraphicsEngine::BlitBitmapWithMask(const Bitmap* bitmap,
 						destBitmap->Surface(), &destRect);
 			}
 		}
-		maskPixels += mask->Pitch();
 	}
 	mask->Unlock();
 
