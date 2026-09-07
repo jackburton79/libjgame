@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <iostream>
 
 #include "Bitmap.h"
@@ -7,14 +6,14 @@
 
 #include <SDL.h>
 
-static GraphicsEngine *sGraphicsEngine = NULL;
+static GraphicsEngine *sGraphicsEngine = nullptr;
 
 GraphicsEngine::GraphicsEngine()
 	:
-	fSDLWindow(NULL),
-	fSDLRenderer(NULL),
-	fSDLTexture(NULL),
-	fScreen(NULL),
+	fSDLWindow(nullptr),
+	fSDLRenderer(nullptr),
+	fSDLTexture(nullptr),
+	fScreen(nullptr),
 	fFlags(0),
 	fOldDepth(0),
 	fOldFlags(0)
@@ -58,7 +57,7 @@ GraphicsEngine::Initialize()
 		sGraphicsEngine = new GraphicsEngine();
 	} catch (...) {
 		std::cout << Log::Red << "Failed!" << std::endl;
-		sGraphicsEngine = NULL;
+		sGraphicsEngine = nullptr;
 		return false;
 	}
 
@@ -79,19 +78,19 @@ GraphicsEngine::Destroy()
 {
 	std::cout << "GraphicsEngine::Destroy()" << std::endl;
 	delete sGraphicsEngine;
-	sGraphicsEngine = NULL;
+	sGraphicsEngine = nullptr;
 }
 
 
 void
 GraphicsEngine::SetClipping(const GFX::rect* rect)
 {
-	if (rect != NULL) {
+	if (rect != nullptr) {
 		SDL_Rect sdlRect;
 		GFXRectToSDLRect(rect, &sdlRect);
 		SDL_SetClipRect(fScreen->Surface(), &sdlRect);
 	}
-	SDL_SetClipRect(fScreen->Surface(), NULL);
+	SDL_SetClipRect(fScreen->Surface(), nullptr);
 }
 
 
@@ -105,7 +104,7 @@ GraphicsEngine::BlitToScreen(const Bitmap* sourceBitmap,
 		sourceBitmap->Width(),
 		sourceBitmap->Height()
 	};
-	return SDL_BlitSurface(sourceBitmap->Surface(), NULL,
+	return SDL_BlitSurface(sourceBitmap->Surface(), nullptr,
 					fScreen->Surface(), &sdlDestRect) == 0;
 }
 
@@ -116,13 +115,13 @@ GraphicsEngine::BlitToScreen(const Bitmap* source, GFX::rect *sourceRect,
 {
 	SDL_Rect sdlSourceRect;
 	SDL_Rect sdlDestRect;
-	SDL_Rect* sdlSourceRectPtr = NULL;
-	SDL_Rect* sdlDestRectPtr = NULL;
-	if (sourceRect != NULL) {
+	SDL_Rect* sdlSourceRectPtr = nullptr;
+	SDL_Rect* sdlDestRectPtr = nullptr;
+	if (sourceRect != nullptr) {
 		GFXRectToSDLRect(sourceRect, &sdlSourceRect);
 		sdlSourceRectPtr = &sdlSourceRect;
 	}
-	if (destRect != NULL) {
+	if (destRect != nullptr) {
 		GFXRectToSDLRect(destRect, &sdlDestRect);
 		sdlDestRectPtr = &sdlDestRect;
 	}
@@ -130,7 +129,7 @@ GraphicsEngine::BlitToScreen(const Bitmap* source, GFX::rect *sourceRect,
 	int result = SDL_BlitSurface(source->Surface(), sdlSourceRectPtr,
 					fScreen->Surface(), sdlDestRectPtr);
 
-	if (destRect != NULL)
+	if (destRect != nullptr)
 		SDLRectToGFXRect(&sdlDestRect, destRect);
 
 	return result == 0;
@@ -143,13 +142,13 @@ GraphicsEngine::BlitToScreenScaled(const Bitmap* source, GFX::rect *sourceRect,
 {
 	SDL_Rect sdlSourceRect;
 	SDL_Rect sdlDestRect;
-	SDL_Rect* sdlSourceRectPtr = NULL;
-	SDL_Rect* sdlDestRectPtr = NULL;
+	SDL_Rect* sdlSourceRectPtr = nullptr;
+	SDL_Rect* sdlDestRectPtr = nullptr;
 	if (sourceRect != NULL) {
 		GFXRectToSDLRect(sourceRect, &sdlSourceRect);
 		sdlSourceRectPtr = &sdlSourceRect;
 	}
-	if (destRect != NULL) {
+	if (destRect != nullptr) {
 		GFXRectToSDLRect(destRect, &sdlDestRect);
 		sdlDestRectPtr = &sdlDestRect;
 	}
@@ -157,7 +156,7 @@ GraphicsEngine::BlitToScreenScaled(const Bitmap* source, GFX::rect *sourceRect,
 	int result = SDL_BlitScaled(source->Surface(), sdlSourceRectPtr,
 					fScreen->Surface(), sdlDestRectPtr);
 
-	if (destRect != NULL)
+	if (destRect != nullptr)
 		SDLRectToGFXRect(&sdlDestRect, destRect);
 
 	return result == 0;
@@ -171,13 +170,13 @@ GraphicsEngine::BlitBitmap(const Bitmap* source, GFX::rect *sourceRect,
 {
 	SDL_Rect sdlSourceRect;
 	SDL_Rect sdlDestRect;
-	SDL_Rect* sdlSourceRectPtr = NULL;
-	SDL_Rect* sdlDestRectPtr = NULL;
-	if (sourceRect != NULL) {
+	SDL_Rect* sdlSourceRectPtr = nullptr;
+	SDL_Rect* sdlDestRectPtr = nullptr;
+	if (sourceRect != nullptr) {
 		GFXRectToSDLRect(sourceRect, &sdlSourceRect);
 		sdlSourceRectPtr = &sdlSourceRect;
 	}
-	if (destRect != NULL) {
+	if (destRect != nullptr) {
 		GFXRectToSDLRect(destRect, &sdlDestRect);
 		sdlDestRectPtr = &sdlDestRect;
 	}
@@ -185,7 +184,7 @@ GraphicsEngine::BlitBitmap(const Bitmap* source, GFX::rect *sourceRect,
 	int result = SDL_BlitSurface(source->Surface(), sdlSourceRectPtr,
 					dest->Surface(), sdlDestRectPtr);
 
-	if (destRect != NULL)
+	if (destRect != nullptr)
 		SDLRectToGFXRect(&sdlDestRect, destRect);
 
 	return result == 0;
@@ -249,13 +248,13 @@ GraphicsEngine::BlitBitmapScaled(const Bitmap* bitmap, GFX::rect* sourceRect,
 {
 	SDL_Rect sdlSourceRect;
 	SDL_Rect sdlDestRect;
-	SDL_Rect* sdlSourceRectPtr = NULL;
-	SDL_Rect* sdlDestRectPtr = NULL;
-	if (sourceRect != NULL) {
+	SDL_Rect* sdlSourceRectPtr = nullptr;
+	SDL_Rect* sdlDestRectPtr = nullptr;
+	if (sourceRect != nullptr) {
 		GFXRectToSDLRect(sourceRect, &sdlSourceRect);
 		sdlSourceRectPtr = &sdlSourceRect;
 	}
-	if (destRect != NULL) {
+	if (destRect != nullptr) {
 		GFXRectToSDLRect(destRect, &sdlDestRect);
 		sdlDestRectPtr = &sdlDestRect;
 	}
@@ -273,7 +272,7 @@ GraphicsEngine::SetVideoMode(uint16 width, uint16 height, uint16 depth,
 	std::cerr << std::dec << width << "x" << height << "x" << depth;
 	std::cerr << ", ";
 
-	if (fSDLWindow == NULL) {
+	if (fSDLWindow == nullptr) {
 		int SDLWindowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
 		if (flags & VIDEOMODE_FULLSCREEN)
 			SDLWindowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
@@ -283,8 +282,10 @@ GraphicsEngine::SetVideoMode(uint16 width, uint16 height, uint16 depth,
 		}
 	}
 
-	if (fSDLTexture != nullptr)
+	if (fSDLTexture != nullptr) {
 		SDL_DestroyTexture(fSDLTexture);
+		fSDLTexture = nullptr;
+	}
 
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
 	SDL_RenderSetLogicalSize(fSDLRenderer, width, height);
@@ -311,7 +312,7 @@ GraphicsEngine::SetVideoMode(uint16 width, uint16 height, uint16 depth,
 void
 GraphicsEngine::SaveCurrentMode()
 {
-	if (fScreen != NULL) {
+	if (fScreen != nullptr) {
 		SDL_Surface* surface = fScreen->Surface();
 		fOldRect.x = fOldRect.y = 0;
 		fOldRect.w = surface->w;
@@ -363,14 +364,14 @@ GraphicsEngine::ScreenBitmap()
 void
 GraphicsEngine::Update()
 {
-	SDL_UpdateTexture(fSDLTexture, NULL,
+	SDL_UpdateTexture(fSDLTexture, nullptr,
 			fScreen->Surface()->pixels,
 			fScreen->Surface()->pitch);
 	SDL_RenderClear(fSDLRenderer);
 	SDL_Rect rect = { 0, 0, ScreenFrame().w, ScreenFrame().h };
 	rect.x = fRenderingOffset.x;
 	rect.y = fRenderingOffset.y;
-	SDL_RenderCopy(fSDLRenderer, fSDLTexture, NULL, &rect);
+	SDL_RenderCopy(fSDLRenderer, fSDLTexture, nullptr, &rect);
 	SDL_RenderPresent(fSDLRenderer);
 }
 
