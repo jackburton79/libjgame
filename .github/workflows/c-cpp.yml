@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
         submodules: recursive
@@ -22,3 +22,13 @@ jobs:
       run: (cd SDL2-2.0.12 && ./configure && make && sudo make install)
     - name: build-all
       run: make
+    - name: build-tests
+      run: make tests
+    - name: run-tests
+      run: |
+        for t in test/*; do
+          if [ -x "$t" ] && [ ! -d "$t" ]; then
+            echo*"Running $t"
+            "$t"
+    *     fi
+        done

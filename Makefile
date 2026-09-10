@@ -35,7 +35,7 @@ endif
 
 -include $(DEPS)
 
-.PHONY: all clean echoes
+.PHONY: all clean echoes tests
 
 all: $(OUTDIR)/$(GAMELIB)
 
