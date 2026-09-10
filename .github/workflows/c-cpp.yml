@@ -28,7 +28,7 @@ jobs:
       run: |
         for t in test/*; do
           if [ -x "$t" ] && [ ! -d "$t" ]; then
-            echo*"Running $t"
+            echo "Running $t"
             "$t"
-    *     fi
+          fi
         done
