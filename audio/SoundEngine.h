@@ -2,11 +2,10 @@
  * SoundEngine.h
  *
  *  Created on: 07/giu/2012
- *      Author: stefano
+ *      Author: JackBurton
  */
 
-#ifndef SOUNDENGINE_H_
-#define SOUNDENGINE_H_
+#pragma once
 
 #include "SupportDefs.h"
 
@@ -15,8 +14,7 @@
 // One slot of SoundEngine's one-shot sound-effect pool - see PlaySample().
 // `device` is really an SDL_AudioDeviceID (a plain uint32 typedef); kept
 // as uint32 here rather than pulling SDL.h into this header, which every
-// other file including SoundEngine.h (Core.cpp, MoviePlayer.cpp, ...)
-// would otherwise inherit.
+// other file including SoundEngine.h would otherwise inherit.
 struct OneShotSound {
 	uint32 device = 0;
 	std::vector<uint8> data;
@@ -95,5 +93,3 @@ private:
 	static void MixAudio(void *unused, uint8 *stream, int len);
 	static void MixOneShot(void* userData, uint8* stream, int len);
 };
-
-#endif /* SOUNDENGINE_H_ */
