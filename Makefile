@@ -4,6 +4,7 @@ CXX := g++
 AR := ar
 RM := rm -rf
 
+LIBS := -lz $(shell sdl2-config --libs)
 GAMELIB := libjgame.a
 
 OUTDIR := lib
@@ -45,6 +46,15 @@ $(OUTDIR)/$(GAMELIB): $(OBJS)
 $(OBJDIR)/%.o: %.cpp
 	mkdir -p $(@D)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -MP -c $< -o $@
+
+TEST_SRCS := $(wildcard test/*.cpp)
+TESTS := $(TEST_SRCS:.cpp=)
+
+tests: $(TESTS)
+
+$(TESTS): %: %.cpp $(OUTDIR)/$(GAMELIB)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< \
+		-L$(OUTDIR) -ljgame $(LIBS)
 
 clean:
 	$(RM) $(OUTDIR) $(OBJDIR)
