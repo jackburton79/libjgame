@@ -2,7 +2,7 @@
  * SoundEngine.cpp
  *
  *  Created on: 07/giu/2012
- *      Author: stefano
+ *      Author: JackBurton
  */
 
 #include "SoundEngine.h"
