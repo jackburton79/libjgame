@@ -4,18 +4,10 @@
  * Regression test for an out-of-bounds read (SEGV / heap-buffer-overflow) in
  * GraphicsEngine::BlitBitmapWithMask().
  *
- * AreaRoom::DrawBitmap() passes, as maskRect, the actor position in area
- * coordinates minus half the actor frame. When an actor ends up near or beyond
- * the area boundary (negative coordinates, or past width/height), the mask
- * pointer arithmetic in BlitBitmapWithMask() used to walk outside the mask
- * bitmap and dereference unmapped memory. The dest-rectangle clipping already
- * in the function does not help: dest is in viewport coordinates and stays
- * valid even when the area/mask coordinates do not.
- *
  * This test drives BlitBitmapWithMask() directly with mask rectangles that sit
- * partly or entirely outside the mask, mimicking an actor drawn at the edge of
- * the area. It checks that nothing reads out of bounds (build it with
- * -fsanitize=address, as the Makefile rule does) and that the normal in-bounds
+ * partly or entirely outside the mask.
+ * It checks that nothing reads out of bounds (build it with -fsanitize=address,
+ * as the Makefile rule does) and that the normal in-bounds
  * path still blits.
  */
 
@@ -47,10 +39,7 @@ DrawnPixels(Bitmap* bitmap)
 	return count;
 }
 
-// maskX/maskY are the actor position in *area* coordinates (what AreaRoom.cpp
-// passes as maskRect); they can be negative or past the area bounds. destX/destY
-// are the on-screen destination (viewport coordinates), which stay valid even
-// when the area coordinates do not.
+
 static int
 RunCase(const char* name, int maskW, int maskH,
 	int spriteW, int spriteH, int maskX, int maskY, int destX, int destY)
@@ -110,18 +99,18 @@ main()
 		sFailures++;
 	}
 
-	// Actor straddling the top-left corner: negative mask origin.
+	// Sprite straddling the top-left corner: negative mask origin.
 	RunCase("negative origin", kMaskW, kMaskH, kSprite, kSprite, -16, -16, 0, 0);
 
-	// Actor completely off the top-left.
+	// Sprite completely off the top-left.
 	RunCase("fully off top-left", kMaskW, kMaskH, kSprite, kSprite,
 		-64, -64, 0, 0);
 
-	// Actor straddling the bottom-right edge.
+	// Sprite straddling the bottom-right edge.
 	RunCase("straddling bottom-right", kMaskW, kMaskH, kSprite, kSprite,
 		kMaskW - 8, kMaskH - 8, 100, 100);
 
-	// Actor far past the bottom-right edge.
+	// Sprite far past the bottom-right edge.
 	RunCase("fully off bottom-right", kMaskW, kMaskH, kSprite, kSprite,
 		kMaskW + 500, kMaskH + 500, 10, 10);
 
