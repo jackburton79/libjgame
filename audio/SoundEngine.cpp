@@ -43,18 +43,12 @@ SoundEngine::~SoundEngine()
 bool
 SoundEngine::Initialize()
 {
-	std::cout << "Initializing Sound Engine... ";
-	std::flush(std::cout);
 	try {
 		if (sSoundEngine == NULL)
 			sSoundEngine = new SoundEngine();
 	} catch (std::exception& e) {
-		std::cerr << Log::Red << e.what() << std::endl;
-		std::cout << "Failed!" << std::endl;
 		return false;
 	}
-	std::cout << Log::Green << "OK!" << std::endl;
-	std::cerr << Log::Normal;
 	return true;
 }
 
@@ -79,13 +73,14 @@ SoundEngine::Get()
 bool
 SoundEngine::InitBuffers(bool stereo, bool bit16, uint16 sampleRate, uint32 bufferLen)
 {
+#if 0
 	std::cout << "InitBuffers(";
 	std::cout << sampleRate << " KHz";
 	std::cout << ", " << (stereo ? "STEREO" : "MONO");
 	std::cout << ", " << (bit16 ? "16BIT" : "8BIT");
 	std::cout << ", " << bufferLen << " bytes";
 	std::cout << std::endl;
-
+#endif
 	fBuffer = new SoundBuffer(stereo, bit16, sampleRate, bufferLen);
 
 	SDL_AudioSpec audioSpec;
@@ -97,9 +92,6 @@ SoundEngine::InitBuffers(bool stereo, bool bit16, uint16 sampleRate, uint32 buff
 	audioSpec.userdata = this;
 
 	if (SDL_OpenAudio(&audioSpec, NULL) < 0 ) {
-		std::cerr << Log::Red << "Unable to open audio: ";
-		std::cerr << SDL_GetError() << std::endl;
-		std::cerr << Log::Normal;
 		delete fBuffer;
 		fBuffer = NULL;
 		return false;
@@ -175,7 +167,7 @@ SoundBuffer::SoundBuffer(bool stereo, bool bit16, uint16 sampleRate, uint32 buff
 	fBufferPos(0),
 	fConsumedPos(0)
 {
-	fData = (uint8*)calloc(1, bufferLen);
+	fData = reinterpret_cast<uint8*>(calloc(1, bufferLen));
 }
 
 
@@ -230,7 +222,7 @@ SoundBuffer::AddSample(sint16 sample)
 uint16
 SoundBuffer::ConsumeSamples(uint8* destBuffer, uint16 numSamples)
 {
-	uint32 numRequested = (uint32)numSamples;
+	uint32 numRequested = static_cast<uint32>(numSamples);
 	uint32 numAvailable = std::min(numRequested, AvailableData());
 	if (numAvailable == 0)
 		return 0;
@@ -249,7 +241,7 @@ SoundBuffer::ConsumeSamples(uint8* destBuffer, uint16 numSamples)
 	if (fConsumedPos >= fBufferLength)
 		fConsumedPos = (fConsumedPos - fBufferLength);
 
-	return (uint16)numAvailable;
+	return static_cast<uint16>(numAvailable);
 }
 
 
@@ -301,6 +293,7 @@ SoundEngine::PlaySample(const uint8* data, uint32 dataSize, uint16 channels,
 
 		SDL_AudioDeviceID device = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
 		if (device == 0) {
+			// TODO: Return an error ?
 			std::cerr << Log::Red << "SoundEngine::PlaySample(): Unable to open audio device: "
 				<< SDL_GetError() << Log::Normal << std::endl;
 			slot.device = 0;
