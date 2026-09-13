@@ -6,13 +6,40 @@
 
 #include <SDL.h>
 
+struct GraphicsEngine::RenderContext {
+	RenderContext();
+	~RenderContext();
+
+	SDL_Window *SDLWindow;
+	SDL_Renderer *SDLRenderer;
+	SDL_Texture* SDLTexture;
+};
+
+GraphicsEngine::RenderContext::RenderContext()
+	:
+	SDLWindow(nullptr),
+	SDLRenderer(nullptr),
+	SDLTexture(nullptr)
+{
+}
+
+
+GraphicsEngine::RenderContext::~RenderContext()
+{
+	if (SDLTexture != nullptr)
+		SDL_DestroyTexture(SDLTexture);
+	if (SDLRenderer != nullptr)
+		SDL_DestroyRenderer(SDLRenderer);
+	if (SDLWindow != nullptr)
+		SDL_DestroyWindow(SDLWindow);
+}
+
+
 static GraphicsEngine *sGraphicsEngine = nullptr;
 
 GraphicsEngine::GraphicsEngine()
 	:
-	fSDLWindow(nullptr),
-	fSDLRenderer(nullptr),
-	fSDLTexture(nullptr),
+	fRenderContext(nullptr),
 	fScreen(nullptr),
 	fFlags(0),
 	fOldDepth(0),
@@ -23,18 +50,15 @@ GraphicsEngine::GraphicsEngine()
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 		throw std::runtime_error("GraphicsEngine: SDL Error");
 	SDL_ShowCursor(0);
+
+	fRenderContext = new GraphicsEngine::RenderContext();
 }
 
 
 GraphicsEngine::~GraphicsEngine()
 {
 	fScreen->Release();
-	if (fSDLTexture != nullptr)
-		SDL_DestroyTexture(fSDLTexture);
-	if (fSDLRenderer != nullptr)
-		SDL_DestroyRenderer(fSDLRenderer);
-	if (fSDLWindow != nullptr)
-		SDL_DestroyWindow(fSDLWindow);
+	delete fRenderContext;
 	SDL_Quit();
 }
 
@@ -286,27 +310,29 @@ GraphicsEngine::SetVideoMode(uint16 width, uint16 height, uint16 depth,
 	std::cerr << std::dec << width << "x" << height << "x" << depth;
 	std::cerr << ", ";
 
-	if (fSDLWindow == nullptr) {
+	if (fRenderContext->SDLWindow == nullptr) {
 		int SDLWindowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
 		if (flags & VIDEOMODE_FULLSCREEN)
 			SDLWindowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		if (SDL_CreateWindowAndRenderer(width, height, SDLWindowFlags,
-										&fSDLWindow, &fSDLRenderer) != 0) {
+										&fRenderContext->SDLWindow,
+										&fRenderContext->SDLRenderer) != 0) {
 			throw std::runtime_error("Cannot Create Window");
 		}
 	}
 
-	if (fSDLTexture != nullptr) {
-		SDL_DestroyTexture(fSDLTexture);
-		fSDLTexture = nullptr;
+	if (fRenderContext->SDLTexture != nullptr) {
+		SDL_DestroyTexture(fRenderContext->SDLTexture);
+		fRenderContext->SDLTexture = nullptr;
 	}
 
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
-	SDL_RenderSetLogicalSize(fSDLRenderer, width, height);
+	SDL_RenderSetLogicalSize(fRenderContext->SDLRenderer, width, height);
 
 	SDL_Surface* surface = SDL_CreateRGBSurface(0, width, height, 32,
 						0, 0, 0, 0);
-	fSDLTexture = SDL_CreateTexture(fSDLRenderer, SDL_PIXELFORMAT_RGB888,
+	fRenderContext->SDLTexture = SDL_CreateTexture(fRenderContext->SDLRenderer,
+						SDL_PIXELFORMAT_RGB888,
 						SDL_TEXTUREACCESS_STREAMING,
 						width, height);
 
@@ -322,7 +348,8 @@ GraphicsEngine::SetVideoMode(uint16 width, uint16 height, uint16 depth,
 	std::cout << std::endl;
 
 	// Center cursor in window
-	SDL_WarpMouseInWindow(fSDLWindow, fScreen->Width() / 2, fScreen->Height() / 2);
+	SDL_WarpMouseInWindow(fRenderContext->SDLWindow,
+						fScreen->Width() / 2, fScreen->Height() / 2);
 }
 
 
@@ -367,7 +394,8 @@ GraphicsEngine::SetRenderingOffset(const GFX::point& point)
 void
 GraphicsEngine::SetWindowCaption(const char* caption)
 {
-	SDL_SetWindowTitle(fSDLWindow, caption);
+	if (fRenderContext != nullptr && fRenderContext->SDLWindow != nullptr)
+		SDL_SetWindowTitle(fRenderContext->SDLWindow, caption);
 }
 
 
@@ -381,15 +409,15 @@ GraphicsEngine::ScreenBitmap()
 void
 GraphicsEngine::Update()
 {
-	SDL_UpdateTexture(fSDLTexture, nullptr,
+	SDL_UpdateTexture(fRenderContext->SDLTexture, nullptr,
 			fScreen->Surface()->pixels,
 			fScreen->Surface()->pitch);
-	SDL_RenderClear(fSDLRenderer);
+	SDL_RenderClear(fRenderContext->SDLRenderer);
 	SDL_Rect rect = { 0, 0, ScreenFrame().w, ScreenFrame().h };
 	rect.x = fRenderingOffset.x;
 	rect.y = fRenderingOffset.y;
-	SDL_RenderCopy(fSDLRenderer, fSDLTexture, nullptr, &rect);
-	SDL_RenderPresent(fSDLRenderer);
+	SDL_RenderCopy(fRenderContext->SDLRenderer, fRenderContext->SDLTexture, nullptr, &rect);
+	SDL_RenderPresent(fRenderContext->SDLRenderer);
 }
 
 
@@ -409,5 +437,5 @@ void
 GraphicsEngine::SetFade(uint16 value)
 {
 	if (value <= 255)
-		SDL_SetTextureColorMod(fSDLTexture, value, value, value);
+		SDL_SetTextureColorMod(fRenderContext->SDLTexture, value, value, value);
 }

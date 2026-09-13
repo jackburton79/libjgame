@@ -1,16 +1,13 @@
-#ifndef __GRAPHICS_ENGINE_H
-#define __GRAPHICS_ENGINE_H
+#pragma once
 
 #include "Bitmap.h"
 #include "GraphicsDefs.h"
 
-#include "SDL.h"
-
-
-
 class Bitmap;
 class GraphicsEngine {
 public:
+	struct RenderContext;
+
 	static GraphicsEngine* Get();
 	static bool Initialize();
 	static void Destroy();
@@ -65,9 +62,8 @@ public:
 	void SetFade(uint16 value);
 
 private:
-	SDL_Window *fSDLWindow;
-	SDL_Renderer *fSDLRenderer;
-	SDL_Texture* fSDLTexture;
+	RenderContext* fRenderContext;
+
 	Bitmap* fScreen;
 	uint16 fFlags;
 	GFX::point fRenderingOffset;
@@ -79,5 +75,3 @@ private:
 	GraphicsEngine();
 	~GraphicsEngine();
 };
-
-#endif
