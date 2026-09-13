@@ -10,6 +10,8 @@ struct GraphicsEngine::RenderContext {
 	RenderContext();
 	~RenderContext();
 
+	RenderContext(const RenderContext&) = delete;
+
 	SDL_Window *SDLWindow;
 	SDL_Renderer *SDLRenderer;
 	SDL_Texture* SDLTexture;
