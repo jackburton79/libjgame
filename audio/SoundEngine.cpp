@@ -14,15 +14,19 @@
 #include <algorithm>
 #include <iostream>
 
-static SoundEngine* sSoundEngine = NULL;
+static SoundEngine* sSoundEngine = nullptr;
 
 SoundEngine::SoundEngine()
 	:
-	fBuffer(NULL),
+	fBuffer(nullptr),
 	fPlaying(false)
 {
-	if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0)
-		throw std::runtime_error("Error while initializing SDL Sound System");
+	if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0) {
+		std::string error;
+		error.append("SoundEngine: Error while initializing SDL Sound System: ");
+		error.append(SDL_GetError());
+		throw std::runtime_error(error);
+	}
 }
 
 
@@ -34,7 +38,7 @@ SoundEngine::~SoundEngine()
 
 	for (uint8 i = 0; i < kMaxOneShots; i++) {
 		if (fOneShots[i].device != 0)
-			SDL_CloseAudioDevice((SDL_AudioDeviceID)fOneShots[i].device);
+			SDL_CloseAudioDevice(reinterpret_cast<SDL_AudioDeviceID>(fOneShots[i].device));
 	}
 }
 
@@ -44,7 +48,7 @@ bool
 SoundEngine::Initialize()
 {
 	try {
-		if (sSoundEngine == NULL)
+		if (sSoundEngine == nullptr)
 			sSoundEngine = new SoundEngine();
 	} catch (std::exception& e) {
 		return false;
@@ -58,7 +62,7 @@ void
 SoundEngine::Destroy()
 {
 	delete sSoundEngine;
-	sSoundEngine = NULL;
+	sSoundEngine = nullptr;
 }
 
 
@@ -91,9 +95,10 @@ SoundEngine::InitBuffers(bool stereo, bool bit16, uint16 sampleRate, uint32 buff
 	audioSpec.callback = SoundEngine::MixAudio;
 	audioSpec.userdata = this;
 
-	if (SDL_OpenAudio(&audioSpec, NULL) < 0 ) {
+	if (SDL_OpenAudio(&audioSpec, nullptr) < 0 ) {
+		// TODO: Return SDL_Error() in some way
 		delete fBuffer;
-		fBuffer = NULL;
+		fBuffer = nullptr;
 		return false;
 	}
 
@@ -106,7 +111,7 @@ SoundEngine::DestroyBuffers()
 {
 	SDL_CloseAudio();
 	delete fBuffer;
-	fBuffer = NULL;
+	fBuffer = nullptr;
 }
 
 
@@ -162,12 +167,12 @@ SoundBuffer::SoundBuffer(bool stereo, bool bit16, uint16 sampleRate, uint32 buff
 	fStereo(stereo),
 	f16Bit(bit16),
 	fSampleRate(sampleRate),
-	fData(NULL),
+	fData(nullptr),
 	fBufferLength(bufferLen),
 	fBufferPos(0),
 	fConsumedPos(0)
 {
-	fData = reinterpret_cast<uint8*>(calloc(1, bufferLen));
+	fData = reinterpret_cast<uint8*>(::calloc(1, bufferLen));
 }
 
 
@@ -260,7 +265,7 @@ void
 SoundEngine::PlaySample(const uint8* data, uint32 dataSize, uint16 channels,
 	uint16 bitsPerSample, uint32 sampleRate)
 {
-	if (data == NULL || dataSize == 0 || (bitsPerSample != 8 && bitsPerSample != 16))
+	if (data == nullptr || dataSize == 0 || (bitsPerSample != 8 && bitsPerSample != 16))
 		return;
 
 	int slotIndex = -1;
@@ -280,7 +285,7 @@ SoundEngine::PlaySample(const uint8* data, uint32 dataSize, uint16 channels,
 
 	if (needsReopen) {
 		if (slot.device != 0)
-			SDL_CloseAudioDevice((SDL_AudioDeviceID)slot.device);
+			SDL_CloseAudioDevice(reinterpret_cast<SDL_AudioDeviceID>(slot.device));
 
 		SDL_AudioSpec spec;
 		SDL_zero(spec);
@@ -291,7 +296,7 @@ SoundEngine::PlaySample(const uint8* data, uint32 dataSize, uint16 channels,
 		spec.callback = SoundEngine::MixOneShot;
 		spec.userdata = &slot;
 
-		SDL_AudioDeviceID device = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
+		SDL_AudioDeviceID device = SDL_OpenAudioDevice(nullptr, 0, &spec, nullptr, 0);
 		if (device == 0) {
 			// TODO: Return an error ?
 			std::cerr << Log::Red << "SoundEngine::PlaySample(): Unable to open audio device: "
@@ -299,12 +304,12 @@ SoundEngine::PlaySample(const uint8* data, uint32 dataSize, uint16 channels,
 			slot.device = 0;
 			return;
 		}
-		slot.device = (uint32)device;
+		slot.device = reinterpret_cast<uint32>(device);
 		slot.channels = channels;
 		slot.bitsPerSample = bitsPerSample;
 		slot.sampleRate = sampleRate;
 	} else {
-		SDL_LockAudioDevice((SDL_AudioDeviceID)slot.device);
+		SDL_LockAudioDevice(reinterpret_cast<SDL_AudioDeviceID>(slot.device));
 	}
 
 	slot.data.assign(data, data + dataSize);
@@ -312,9 +317,9 @@ SoundEngine::PlaySample(const uint8* data, uint32 dataSize, uint16 channels,
 	slot.active = true;
 
 	if (!needsReopen)
-		SDL_UnlockAudioDevice((SDL_AudioDeviceID)slot.device);
+		SDL_UnlockAudioDevice(reinterpret_cast<SDL_AudioDeviceID>(slot.device));
 
-	SDL_PauseAudioDevice((SDL_AudioDeviceID)slot.device, 0);
+	SDL_PauseAudioDevice(reinterpret_cast<SDL_AudioDeviceID>(slot.device), 0);
 }
 
 
