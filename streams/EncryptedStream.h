@@ -5,8 +5,7 @@
  *      Author: stefano
  */
 
-#ifndef ENCRYPTEDSTREAM_H_
-#define ENCRYPTEDSTREAM_H_
+#pragma once
 
 #include "Stream.h"
 
@@ -27,6 +26,3 @@ private:
 	const uint8* fKey;
 	size_t fKeySize;
 };
-
-
-#endif /* ENCRYPTEDSTREAM_H_ */

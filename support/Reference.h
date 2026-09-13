@@ -4,8 +4,7 @@
  * Distributed under the terms of the MIT License.
  */
 
-#ifndef REFERENCE_H_
-#define REFERENCE_H_
+#pragma once
 
 #include <cstddef>
 
@@ -98,9 +97,3 @@ public:
 private:
 	T* fTarget;
 };
-
-
-
-
-
-#endif /* REFERENCE_H_ */

@@ -5,8 +5,7 @@
  *      Author: Stefano Ceccherini
  */
 
-#ifndef ZLIBDECOMPRESSOR_H_
-#define ZLIBDECOMPRESSOR_H_
+#pragma once
 
 #include "SupportDefs.h"
 
@@ -21,5 +20,3 @@ public:
 								void* outputBuffer,
 								size_t& outputSize);
 };
-
-#endif /* ZLIBDECOMPRESSOR_H_ */

@@ -5,8 +5,7 @@
  *      Author: Stefano Ceccherini
  */
 
-#ifndef STRINGSTREAM_H_
-#define STRINGSTREAM_H_
+#pragma once
 
 #include "MemoryStream.h"
 
@@ -18,5 +17,3 @@ public:
 	StringStream(const std::string& string);
 	virtual ~StringStream();
 };
-
-#endif /* STRINGSTREAM_H_ */

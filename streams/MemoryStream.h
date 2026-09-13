@@ -1,5 +1,4 @@
-#ifndef __MEMORY_H
-#define __MEMORY_H
+#pragma once
 
 #include "Stream.h"
 #include "SupportDefs.h"
@@ -32,5 +31,3 @@ private:
 
 	MemoryStream(const MemoryStream& other);
 };
-
-#endif

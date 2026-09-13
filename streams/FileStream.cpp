@@ -134,4 +134,3 @@ FileStream::Write(const void *src, size_t count)
 {
 	return ::fwrite(src, 1, count, fFileHandle);
 }
-

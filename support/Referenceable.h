@@ -7,8 +7,7 @@
 
 #include "SupportDefs.h"
 
-#ifndef __REFERENCEABLE_H
-#define __REFERENCEABLE_H
+#pragma once
 
 class Referenceable {
 public:
@@ -46,5 +45,3 @@ private:
 
 
 extern void ReleaseAndNil(Referenceable*& );
-
-#endif /* REFERENCEABLE_H_ */

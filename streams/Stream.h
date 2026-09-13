@@ -1,5 +1,4 @@
-#ifndef __STREAM_H
-#define __STREAM_H
+#pragma once
 
 #include <cstdio>
 #include <stdexcept>
@@ -89,6 +88,3 @@ public:
 	void Dump();
 	void DumpToFile(const char *fileName);
 };
-
-
-#endif

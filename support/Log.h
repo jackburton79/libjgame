@@ -5,9 +5,7 @@
  *      Author: Stefano Ceccherini
  */
 
-#ifndef LOG_H_
-#define LOG_H_
-
+#pragma once
 
 #define GREEN(x) std::string("\033[1;32m").append(x).append("\033[0m")
 #define RED(x) std::string("\033[1;31m").append(x).append("\033[0m")
@@ -19,6 +17,3 @@ public:
 	static const char* Red;
 	static const char* Yellow;
 };
-
-
-#endif /* LOG_H_ */

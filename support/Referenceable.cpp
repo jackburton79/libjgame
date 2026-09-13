@@ -44,8 +44,6 @@ Referenceable::Acquire()
 	}
 	if (previousRefCount == 0)
 		FirstReferenceAcquired();
-
-
 }
 
 

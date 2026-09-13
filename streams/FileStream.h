@@ -1,5 +1,4 @@
-#ifndef __FILESTREAM_H
-#define __FILESTREAM_H
+#pragma once
 
 
 #include <cstdio>
@@ -46,6 +45,3 @@ public:
 private:
 	FILE *fFileHandle;
 };
-
-
-#endif // __FILESTREAM_H
