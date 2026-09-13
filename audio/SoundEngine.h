@@ -41,6 +41,10 @@ public:
 
 	uint32 AvailableData() const;
 
+	// deleted
+	SoundBuffer(const SoundBuffer&) = delete;
+	SoundBuffer& operator=(const SoundBuffer&) = delete;
+
 private:
 	bool fStereo;
 	bool f16Bit;
@@ -79,6 +83,10 @@ public:
 	// it was playing) rather than dropping the new sound.
 	void PlaySample(const uint8* data, uint32 dataSize, uint16 channels,
 		uint16 bitsPerSample, uint32 sampleRate);
+
+	// deleted
+	SoundEngine(const SoundEngine&) = delete;
+	SoundEngine& operator=(const SoundEngine&) = delete;
 
 private:
 	SoundBuffer* fBuffer;
