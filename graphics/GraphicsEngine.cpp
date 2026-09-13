@@ -77,23 +77,17 @@ GraphicsEngine::Get()
 bool
 GraphicsEngine::Initialize()
 {
-	std::cout << Log::Normal << "Initializing Graphics Engine... ";
-	std::flush(std::cout);
 	try {
 		sGraphicsEngine = new GraphicsEngine();
 	} catch (...) {
-		std::cout << Log::Red << "Failed!" << std::endl;
 		sGraphicsEngine = nullptr;
 		return false;
 	}
 
 	if (!GFX::InitializeGlobalPalettes()) {
-		std::cout << Log::Red << "Failed (palettes)" << std::endl;
 		return false;
 	}
 
-	std::cout << Log::Green << "OK!" << std::endl;
-	std::cout << Log::Normal;
 	return true;
 }
 
@@ -102,7 +96,6 @@ GraphicsEngine::Initialize()
 void
 GraphicsEngine::Destroy()
 {
-	std::cout << "GraphicsEngine::Destroy()" << std::endl;
 	delete sGraphicsEngine;
 	sGraphicsEngine = nullptr;
 }
@@ -307,11 +300,6 @@ void
 GraphicsEngine::SetVideoMode(uint16 width, uint16 height, uint16 depth,
 		uint16 flags)
 {
-	std::cerr << "GraphicsEngine::SetVideoMode(): ";
-	std::cerr << "Requested ";
-	std::cerr << std::dec << width << "x" << height << "x" << depth;
-	std::cerr << ", ";
-
 	if (fRenderContext->SDLWindow == nullptr) {
 		int SDLWindowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
 		if (flags & VIDEOMODE_FULLSCREEN)
@@ -328,11 +316,12 @@ GraphicsEngine::SetVideoMode(uint16 width, uint16 height, uint16 depth,
 		fRenderContext->SDLTexture = nullptr;
 	}
 
+	// TODO: add parameter to control this
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
 	SDL_RenderSetLogicalSize(fRenderContext->SDLRenderer, width, height);
 
-	SDL_Surface* surface = SDL_CreateRGBSurface(0, width, height, 32,
-						0, 0, 0, 0);
+	// TODO: We don't respect the depth parameter
+	SDL_Surface* surface = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
 	fRenderContext->SDLTexture = SDL_CreateTexture(fRenderContext->SDLRenderer,
 						SDL_PIXELFORMAT_RGB888,
 						SDL_TEXTUREACCESS_STREAMING,
@@ -343,11 +332,6 @@ GraphicsEngine::SetVideoMode(uint16 width, uint16 height, uint16 depth,
 
 	fScreen = new Bitmap(surface, true);
 	fFlags = flags;
-
-	std::cout << "got ";
-	std::cout << fScreen->Width() << "x";
-	std::cout << fScreen->Height() << "x" << fScreen->BitsPerPixel();
-	std::cout << std::endl;
 
 	// Center cursor in window
 	SDL_WarpMouseInWindow(fRenderContext->SDLWindow,
