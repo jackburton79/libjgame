@@ -1,5 +1,4 @@
-#ifndef __POLYGON_H
-#define __POLYGON_H
+#pragma once
 
 #include "Bitmap.h"
 #include "GraphicsDefs.h"
@@ -37,6 +36,3 @@ private:
 	GFX::rect fFrame;
 	uint8 fFlags;
 };
-
-
-#endif // __POLYGON_H

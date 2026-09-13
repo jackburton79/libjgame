@@ -5,15 +5,13 @@
  *      Author: Stefano Ceccherini
  */
 
-#ifndef BITMAP_H_
-#define BITMAP_H_
+#pragma once
 
 #include "Referenceable.h"
 #include "GraphicsDefs.h"
 #include "SupportDefs.h"
 
 struct SDL_Surface;
-
 
 class GraphicsEngine;
 class Polygon;
@@ -116,5 +114,3 @@ private:
 	uint8* fData;
 	bool fOwns;
 };
-
-#endif /* BITMAP_H_ */

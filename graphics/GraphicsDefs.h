@@ -5,8 +5,7 @@
  *      Author: stefano
  */
 
-#ifndef GRAPHICSDEFS_H_
-#define GRAPHICSDEFS_H_
+#pragma once
 
 #include "SupportDefs.h"
 
@@ -97,5 +96,3 @@ void SDLRectToGFXRect(const SDL_Rect* source, rect* dest);
 extern const GFX::point kOrigin;
 
 };
-
-#endif /* GRAPHICSDEFS_H_ */
