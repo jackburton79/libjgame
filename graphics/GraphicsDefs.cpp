@@ -14,7 +14,7 @@
 
 namespace GFX {
 
-	// I put these here but don't belong
+	// TODO: Move away from here: we use these from bgemu 
 GFX::Palette* kPaletteRed;
 GFX::Palette* kPaletteBlue;
 GFX::Palette* kPaletteYellow;

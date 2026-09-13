@@ -28,6 +28,8 @@ Bitmap::Bitmap(uint16 width, uint16 height, uint16 bitsPerPixel)
 {
 	fSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height,
 			bitsPerPixel, 0, 0, 0, 0);
+	if (fSurface == nullptr)
+		throw std::runtime_error("Bitmap: cannot create surface");
 }
 
 
@@ -82,7 +84,6 @@ void
 Bitmap::GetPalette(GFX::Palette& palette) const
 {
 	SDL_Color* sdlPalette = fSurface->format->palette->colors;
-
 	for (uint16 c = 0; c < 256; c++) {
 		palette.colors[c].r = sdlPalette[c].r;
 		palette.colors[c].g = sdlPalette[c].g;
@@ -151,14 +152,14 @@ uint32
 Bitmap::GetPixel(uint16 x, uint16 y) const
 {
 	int bpp = fSurface->format->BytesPerPixel;
-	Uint8 *p = (Uint8*)fSurface->pixels + y * fSurface->pitch + x * bpp;
+	Uint8 *p = reinterpret_cast<Uint8*>(fSurface->pixels) + y * fSurface->pitch + x * bpp;
 
-	switch(bpp) {
+	switch (bpp) {
 		case 1:
 			return *p;
 			break;
 		case 2:
-			return *(Uint16*)p;
+			return *reinterpret_cast<Uint16*>(p);
 			break;
 		case 3:
 			if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
@@ -167,7 +168,7 @@ Bitmap::GetPixel(uint16 x, uint16 y) const
 				return p[0] | p[1] << 8 | p[2] << 16;
 			break;
 		case 4:
-			return *(Uint32*)p;
+			return *reinterpret_cast<Uint32*>(p);
 			break;
 		default:
 			return 0;
@@ -184,7 +185,7 @@ Bitmap::PutPixel(int32 x, int32 y, const uint32 color)
 	uint32 bytesPerPixel = fSurface->format->BytesPerPixel;
 	uint32 offset = fSurface->pitch * y + x * bytesPerPixel;
 
-	memcpy((uint8*)fSurface->pixels + offset, &color, bytesPerPixel);
+	memcpy(reinterpret_cast<uint8*>(fSurface->pixels) + offset, &color, bytesPerPixel);
 }
 
 
@@ -429,8 +430,8 @@ void
 Bitmap::ImportData(const void* data, uint32 width, uint32 height)
 {
 	SDL_LockSurface(fSurface);
-	uint8 *ptr = (uint8*)data;
-	uint8 *surfacePixels = (uint8*)fSurface->pixels;
+	const uint8 *ptr = reinterpret_cast<const uint8*>(data);
+	uint8 *surfacePixels = reinterpret_cast<uint8*>(fSurface->pixels);
 	for (uint32 y = 0; y < height; y++) {
 		memcpy(surfacePixels, ptr + y * width, width);
 		surfacePixels += fSurface->pitch;
@@ -449,14 +450,14 @@ Bitmap::Frame() const
 uint16
 Bitmap::Width() const
 {
-	return (uint16)fSurface->w;
+	return static_cast<uint16>(fSurface->w);
 }
 
 
 uint16
 Bitmap::Height() const
 {
-	return (uint16)fSurface->h;
+	return static_cast<uint16>(fSurface->h);
 }
 
 
@@ -542,13 +543,13 @@ Bitmap::Load(const char* fileName)
 Bitmap*
 Bitmap::Load(const void* data, const size_t size)
 {
-	SDL_RWops *rw = SDL_RWFromMem((void*)data, size);
-	if (rw == NULL)
-		return NULL;
+	SDL_RWops *rw = SDL_RWFromMem(const_cast<void*>(data), size);
+	if (rw == nullptr)
+		return nullptr;
 
 	SDL_Surface *surface = SDL_LoadBMP_RW(rw, 1);
-	if (surface == NULL)
-		return NULL;
+	if (surface == nullptr)
+		return nullptr;
 
 	return new Bitmap(surface);
 }
@@ -566,9 +567,9 @@ Bitmap::Mirror()
 {
 	SDL_LockSurface(fSurface);
 
-	uint8* sourcePixels = (uint8*)fSurface->pixels;
+	uint8* sourcePixels = reinterpret_cast<uint8*>(fSurface->pixels);
 	for (int y = 0; y < fSurface->h; y++) {
-		uint8* destPtr = (uint8*)sourcePixels + fSurface->w - 1;
+		uint8* destPtr = reinterpret_cast<uint8*>(sourcePixels) + fSurface->w - 1;
 		uint8* sourcePtr = sourcePixels;
 		while (sourcePtr < destPtr)
 			std::swap(*sourcePtr++, *destPtr--);
@@ -586,7 +587,7 @@ DataBitmap::DataBitmap(void* data, uint16 width, uint16 height, uint16 depth, bo
 	:
 	Bitmap(SDL_CreateRGBSurfaceFrom(data, width,
 							height, depth, width, 0, 0, 0, 0), true),
-	fData((uint8*)data),
+	fData(reinterpret_cast<uint8*>(data)),
 	fOwns(ownsData)
 {
 	// SDL_CreateRGBSurfaceFrom doesn't free the passed data,
