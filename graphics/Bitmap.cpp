@@ -518,7 +518,8 @@ Bitmap::Dump() const
 	SDL_LockSurface(fSurface);
 	for (int32 y = 0; y < fSurface->h; y++) {
 		for (int32 x = 0; x < fSurface->w; x++) {
-			uint8* pixel = (uint8*)fSurface->pixels + y * fSurface->pitch + x;
+			uint8* pixel = reinterpret_cast<uint8*>(fSurface->pixels)
+				+ y * fSurface->pitch + x;
 			std::cout << (int)*pixel << " ";
 		}
 		std::cout << std::endl;

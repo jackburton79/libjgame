@@ -69,7 +69,7 @@ Polygon::AddPoints(GFX::point *points, int32 num)
 	if (newPoints == NULL)
 		return false;
 
-	fPoints = (GFX::point*)newPoints;
+	fPoints = reinterpret_cast<GFX::point*>(newPoints);
 	memcpy(fPoints + fCount, points, num * sizeof(GFX::point));
 	fCount += num;
 
@@ -157,7 +157,7 @@ Polygon::operator=(const Polygon& polygon)
 	fCount = polygon.fCount;
 	fFlags = polygon.fFlags;
 	if (fCount > 0) {
-		fPoints = (GFX::point*)malloc(fCount * sizeof(GFX::point));
+		fPoints = reinterpret_cast<GFX::point*>(malloc(fCount * sizeof(GFX::point)));
 		memcpy(fPoints, polygon.fPoints, fCount * sizeof(GFX::point));
 	}
 	fFrame = polygon.fFrame;

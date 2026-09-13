@@ -230,7 +230,7 @@ GraphicsEngine::BlitBitmapWithMask(const Bitmap* bitmap,
 	if (!mask->Lock())
 		return false;
 
-	uint8* const maskBase = (uint8*)mask->Pixels();
+	uint8* const maskBase = reinterpret_cast<uint8* const>(mask->Pixels());
 	const uint32 maskPitch = mask->Pitch();
 	const int maskWidth = (int)mask->Width();
 	const int maskHeight = (int)mask->Height();

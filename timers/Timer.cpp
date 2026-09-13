@@ -156,7 +156,8 @@ int
 Timer::AddOneShotTimer(uint32 delay, timer_function func, void* parameter)
 {
 	Functor* functor = new Functor(func, parameter);
-	SDL_TimerID id = SDL_AddTimer(delay, oneshot_timer_callback, (void*)functor);
+	SDL_TimerID id = SDL_AddTimer(delay, oneshot_timer_callback,
+								reinterpret_cast<void*>(functor));
 	sOneShotTimers[id] = functor;
 	return id;
 }
@@ -167,7 +168,8 @@ int
 Timer::AddPeriodicTimer(uint32 interval, timer_function func, void* parameter)
 {
 	Functor* functor = new Functor(func, parameter);
-	SDL_TimerID id = SDL_AddTimer(interval, periodic_timer_callback, (void*)functor);
+	SDL_TimerID id = SDL_AddTimer(interval, periodic_timer_callback,
+								reinterpret_cast<void*>(functor));
 	sPeriodicTimers[id] = functor;
 	return id;
 }
