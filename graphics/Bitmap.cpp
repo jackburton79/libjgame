@@ -63,9 +63,10 @@ Bitmap::Clear(uint32 color)
 
 
 void
-Bitmap::SetColors(GFX::Color* colors, uint8 start, int num)
+Bitmap::SetColors(const GFX::Color* colors, uint8 start, int num)
 {
-	SDL_SetPaletteColors(fSurface->format->palette, (SDL_Color*)colors, start, num);
+	SDL_SetPaletteColors(fSurface->format->palette,
+			reinterpret_cast<const SDL_Color*>(colors), start, num);
 }
 
 
@@ -76,7 +77,8 @@ Bitmap::SetColors(const GFX::Color& color, uint8 start, int num)
 	for (int i = 0; i < num; i++) {
 		colorList[i] = color;
 	}
-	SDL_SetPaletteColors(fSurface->format->palette, (SDL_Color*)colorList, start, num);
+	SDL_SetPaletteColors(fSurface->format->palette,
+			reinterpret_cast<const SDL_Color*>(colorList), start, num);
 }
 
 

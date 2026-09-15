@@ -39,7 +39,7 @@ public:
 	void Clear(uint32 color = 0);
 
 	// Colors and palette
-	void SetColors(GFX::Color* colors, uint8 start, int num);
+	void SetColors(const GFX::Color* colors, uint8 start, int num);
 	void SetColors(const GFX::Color& color, uint8 start, int num);
 	void GetPalette(GFX::Palette& palette) const;
 	void SetPalette(const GFX::Palette& palette);
