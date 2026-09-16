@@ -27,8 +27,8 @@ int main()
 	check("Hello", "Hello");
 	check("Hello ", "Hello");
 	check("Hello   ", "Hello");
-	check("   Hello", "   Hello");
-	check("   Hello   ", "   Hello");
+	check("   Hello", "Hello");
+	check("   Hello   ", "Hello");
 	check(" ", "");
 	check("     ", "");
 	check("Hello   World", "Hello   World");
