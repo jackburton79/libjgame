@@ -1,12 +1,15 @@
-#ifndef __UTILS_H
-#define __UTILS_H
+#pragma once
 
 #include <cstdio>
+#include <string>
 
 #include "SupportDefs.h"
 
+// Trim in place
+char* trim(char* string);
+
 // Does not touch the passed string
-const char* trimmed(const char* string);
+std::string trimmed(const char* string);
 
 // Replaces "\" to "/"
 void path_dos_to_unix(char* path);
@@ -23,6 +26,3 @@ void set_bit(uint32& value, int bitPos);
 void clear_bit(uint32& value, int bitPos);
 
 void assert_size(size_t size, size_t controlValue);
-
-
-#endif // __UTILS_H

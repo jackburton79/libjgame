@@ -1,32 +1,87 @@
-#include "Path.h"
 #include "Utils.h"
 
+
+#include <algorithm> 
 #include <assert.h>
+#include <cctype>
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <dirent.h>
-
 #include <string>
 
+#include "Path.h"
 
 
-const char*
-trimmed(const char* string)
+// Source - https://stackoverflow.com/a/217605
+// Posted by Evan Teran, modified by community. See post 'Timeline' for change history
+// Retrieved 2026-09-16, License - CC BY-SA 4.0
+
+
+// Trim from the start (in place)
+inline void ltrim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }));
+}
+
+// Trim from the end (in place)
+inline void rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+// Source - https://stackoverflow.com/a/217605
+// Posted by Evan Teran, modified by community. See post 'Timeline' for change history
+// Retrieved 2026-09-16, License - CC BY-SA 4.0
+
+// Trim from both ends (in place)
+char*
+trim(char* string)
 {
-	char* newStringStart = const_cast<char*>(string);
+	char* newStringStart = string;
 	while (isspace(*newStringStart))
 		newStringStart++;
-
+ 
 	char* endOfString = newStringStart + ::strlen(newStringStart) - 1;
 	while (isspace(*endOfString))
 		endOfString--;
-
+ 
 	endOfString++;
 	*endOfString  = '\0';
 
 	return newStringStart;
+}
+
+
+// Trim from the start (copying)
+std::string
+ltrimmed(std::string string)
+{
+    ltrim(string);
+    return string;
+}
+
+
+// Trim from the end (copying)
+std::string
+rtrimmed(std::string string)
+{
+    rtrim(string);
+    return string;
+}
+
+
+// Trim from both ends (copying)
+std::string
+trimmed(const char *string)
+{
+	std::string copiedString(string);
+    ltrim(copiedString);
+	rtrim(copiedString);
+    return copiedString;
 }
 
 
