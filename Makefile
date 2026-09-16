@@ -47,12 +47,16 @@ $(OBJDIR)/%.o: %.cpp
 	mkdir -p $(@D)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -MMD -MP -c $< -o $@
 
-TEST_SRCS := $(wildcard test/*.cpp)
-TESTS := $(TEST_SRCS:.cpp=)
+TESTDIR := test
+TESTBINDIR := $(OBJDIR)/tests
+
+TEST_SRCS := $(wildcard $(TESTDIR)/*.cpp)
+TESTS := $(patsubst $(TESTDIR)/%.cpp,$(TESTBINDIR)/%,$(TEST_SRCS))
 
 tests: $(TESTS)
 
-$(TESTS): %: %.cpp $(OUTDIR)/$(GAMELIB)
+$(TESTBINDIR)/%: $(TESTDIR)/%.cpp $(OUTDIR)/$(GAMELIB)
+	mkdir -p $(@D)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< \
 		-L$(OUTDIR) -ljgame $(LIBS)
 
