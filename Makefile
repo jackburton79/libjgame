@@ -13,6 +13,7 @@ OBJDIR := obj
 SUBDIRS := \
 	audio \
 	graphics \
+	input \
 	shell \
 	streams \
 	support \
