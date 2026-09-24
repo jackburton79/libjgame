@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "AudioStream.h"
 #include "SupportDefs.h"
 
 #include <vector>
@@ -23,6 +24,23 @@ struct OneShotSound {
 	uint16 channels = 0;
 	uint16 bitsPerSample = 0;
 	uint32 sampleRate = 0;
+};
+
+
+// The engine's music slot: one AudioStream on a device of its own, with a
+// volume and a fade (see SoundEngine::PlayStream()).
+struct StreamSlot {
+	uint32 device = 0;
+	AudioStream* stream = nullptr;
+	uint16 channels = 0;
+	uint32 sampleRate = 0;
+	float volume = 1.0f;		// the bus volume
+	float gain = 1.0f;		// the fade's current level, 0-1
+	float gainStep = 0.0f;		// per sample frame; 0 = no fade running
+	float gainTarget = 1.0f;
+	bool stopAtTarget = false;	// a fade out ends the stream
+	bool finished = true;		// nothing (left) to play
+	uint64 framesPlayed = 0;
 };
 
 
@@ -84,6 +102,20 @@ public:
 	void PlaySample(const uint8* data, uint32 dataSize, uint16 channels,
 		uint16 bitsPerSample, uint32 sampleRate);
 
+	// Streams `stream` (which the engine takes over) on the music device, after
+	// stopping the one already playing. `volume` is 0-1; a `fadeInMs` above 0
+	// raises the volume from silence over that time. Returns false if the audio
+	// device can't be opened (the stream is deleted).
+	bool PlayStream(AudioStream* stream, float volume = 1.0f, uint32 fadeInMs = 0);
+	// Ends the stream; with `fadeOutMs` above 0 it fades out first.
+	void StopStream(uint32 fadeOutMs = 0);
+	void SetStreamVolume(float volume);
+	// Whether a stream is still playing (false once it ends or has faded out).
+	bool IsStreamPlaying() const;
+	// Milliseconds of the current stream played so far.
+	uint32 StreamPositionMs() const;
+	float StreamVolume() const;
+
 	// deleted
 	SoundEngine(const SoundEngine&) = delete;
 	SoundEngine& operator=(const SoundEngine&) = delete;
@@ -94,10 +126,14 @@ private:
 
 	static const uint8 kMaxOneShots = 8;
 	OneShotSound fOneShots[kMaxOneShots];
+	StreamSlot fMusic;
+
+	void _CloseStreamDevice();
 
 	SoundEngine();
 	~SoundEngine();
 
 	static void MixAudio(void *unused, uint8 *stream, int len);
 	static void MixOneShot(void* userData, uint8* stream, int len);
+	static void MixStream(void* userData, uint8* stream, int len);
 };

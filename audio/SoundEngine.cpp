@@ -40,6 +40,8 @@ SoundEngine::~SoundEngine()
 		if (fOneShots[i].device != 0)
 			SDL_CloseAudioDevice(reinterpret_cast<SDL_AudioDeviceID>(fOneShots[i].device));
 	}
+
+	_CloseStreamDevice();
 }
 
 
@@ -343,4 +345,193 @@ SoundEngine::MixOneShot(void* userData, uint8* stream, int len)
 	slot->position += toCopy;
 	if (slot->position >= slot->data.size())
 		slot->active = false;
+}
+
+
+// The music stream: a device of its own (its format is the stream's), a
+// callback that pulls PCM from the stream and applies the volume and the fade.
+
+void
+SoundEngine::_CloseStreamDevice()
+{
+	if (fMusic.device != 0) {
+		// Closing the device waits for its callback, so the stream can go.
+		SDL_CloseAudioDevice(reinterpret_cast<SDL_AudioDeviceID>(fMusic.device));
+		fMusic.device = 0;
+	}
+	delete fMusic.stream;
+	fMusic.stream = nullptr;
+	fMusic.finished = true;
+}
+
+
+bool
+SoundEngine::PlayStream(AudioStream* stream, float volume, uint32 fadeInMs)
+{
+	if (stream == nullptr)
+		return false;
+
+	const uint16 channels = stream->Channels();
+	const uint32 sampleRate = stream->SampleRate();
+	if (channels == 0 || channels > 2 || sampleRate == 0) {
+		delete stream;
+		return false;
+	}
+
+	const bool sameFormat = fMusic.device != 0 && fMusic.channels == channels
+		&& fMusic.sampleRate == sampleRate;
+	if (!sameFormat)
+		_CloseStreamDevice();
+	else
+		SDL_LockAudioDevice(reinterpret_cast<SDL_AudioDeviceID>(fMusic.device));
+
+	if (!sameFormat) {
+		SDL_AudioSpec spec;
+		SDL_zero(spec);
+		spec.freq = (int)sampleRate;
+		spec.format = AUDIO_S16;
+		spec.channels = (Uint8)channels;
+		spec.samples = 4096;
+		spec.callback = SoundEngine::MixStream;
+		spec.userdata = &fMusic;
+
+		SDL_AudioDeviceID device = SDL_OpenAudioDevice(nullptr, 0, &spec, nullptr, 0);
+		if (device == 0) {
+			std::cerr << Log::Red << "SoundEngine::PlayStream(): Unable to open audio device: "
+				<< SDL_GetError() << Log::Normal << std::endl;
+			delete stream;
+			return false;
+		}
+		fMusic.device = reinterpret_cast<uint32>(device);
+		fMusic.channels = channels;
+		fMusic.sampleRate = sampleRate;
+	}
+
+	AudioStream* previous = fMusic.stream;
+	fMusic.stream = stream;
+	fMusic.volume = volume;
+	fMusic.framesPlayed = 0;
+	fMusic.stopAtTarget = false;
+	fMusic.finished = false;
+	if (fadeInMs > 0) {
+		fMusic.gain = 0.0f;
+		fMusic.gainTarget = 1.0f;
+		fMusic.gainStep = 1000.0f / ((float)fadeInMs * (float)sampleRate);
+	} else {
+		fMusic.gain = 1.0f;
+		fMusic.gainTarget = 1.0f;
+		fMusic.gainStep = 0.0f;
+	}
+
+	if (sameFormat)
+		SDL_UnlockAudioDevice(reinterpret_cast<SDL_AudioDeviceID>(fMusic.device));
+	delete previous;
+
+	SDL_PauseAudioDevice(reinterpret_cast<SDL_AudioDeviceID>(fMusic.device), 0);
+	return true;
+}
+
+
+void
+SoundEngine::StopStream(uint32 fadeOutMs)
+{
+	if (fMusic.device == 0 || fMusic.finished)
+		return;
+
+	if (fadeOutMs == 0) {
+		SDL_LockAudioDevice(reinterpret_cast<SDL_AudioDeviceID>(fMusic.device));
+		fMusic.finished = true;
+		SDL_UnlockAudioDevice(reinterpret_cast<SDL_AudioDeviceID>(fMusic.device));
+		return;
+	}
+
+	SDL_LockAudioDevice(reinterpret_cast<SDL_AudioDeviceID>(fMusic.device));
+	fMusic.gainTarget = 0.0f;
+	fMusic.gainStep = fMusic.gain > 0.0f
+		? fMusic.gain * 1000.0f / ((float)fadeOutMs * (float)fMusic.sampleRate)
+		: 1.0f;
+	fMusic.stopAtTarget = true;
+	SDL_UnlockAudioDevice(reinterpret_cast<SDL_AudioDeviceID>(fMusic.device));
+}
+
+
+void
+SoundEngine::SetStreamVolume(float volume)
+{
+	fMusic.volume = std::max(0.0f, std::min(1.0f, volume));
+}
+
+
+float
+SoundEngine::StreamVolume() const
+{
+	return fMusic.volume;
+}
+
+
+bool
+SoundEngine::IsStreamPlaying() const
+{
+	return fMusic.device != 0 && !fMusic.finished;
+}
+
+
+uint32
+SoundEngine::StreamPositionMs() const
+{
+	if (fMusic.sampleRate == 0)
+		return 0;
+	return (uint32)(fMusic.framesPlayed * 1000 / fMusic.sampleRate);
+}
+
+
+/* static */
+void
+SoundEngine::MixStream(void* userData, uint8* stream, int len)
+{
+	StreamSlot* slot = reinterpret_cast<StreamSlot*>(userData);
+	memset(stream, 0, len);
+	if (slot->finished || slot->stream == nullptr)
+		return;
+
+	// The stream may hand back less than asked for; ask again until the
+	// buffer is full or it is over.
+	size_t filled = 0;
+	while (filled < (size_t)len) {
+		const size_t got = slot->stream->Read(stream + filled, (size_t)len - filled);
+		if (got == 0) {
+			slot->finished = true;
+			break;
+		}
+		filled += got;
+	}
+
+	const size_t frameBytes = sizeof(int16) * slot->channels;
+	const size_t frames = filled / frameBytes;
+	int16* samples = reinterpret_cast<int16*>(stream);
+	for (size_t frame = 0; frame < frames; frame++) {
+		if (slot->gainStep > 0.0f) {
+			if (slot->gain < slot->gainTarget)
+				slot->gain = std::min(slot->gain + slot->gainStep, slot->gainTarget);
+			else
+				slot->gain = std::max(slot->gain - slot->gainStep, slot->gainTarget);
+			if (slot->gain == slot->gainTarget) {
+				slot->gainStep = 0.0f;
+				if (slot->stopAtTarget)
+					slot->finished = true;
+			}
+		}
+		const float factor = slot->gain * slot->volume;
+		for (uint16 c = 0; c < slot->channels; c++) {
+			int16& sample = samples[frame * slot->channels + c];
+			sample = (int16)(sample * factor);
+		}
+		if (slot->finished && slot->stopAtTarget) {
+			// silence from here on
+			memset(stream + (frame + 1) * frameBytes, 0, len - (frame + 1) * frameBytes);
+			slot->framesPlayed += frame + 1;
+			return;
+		}
+	}
+	slot->framesPlayed += frames;
 }
