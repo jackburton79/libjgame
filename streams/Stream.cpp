@@ -88,24 +88,32 @@ Stream::Read(void *dst, size_t size)
 char*
 Stream::ReadLine(char *buffer, size_t maxSize, char endLine)
 {
-	maxSize--;
+	if (maxSize == 0)
+		return NULL;
 
-	char *ptr = buffer;
+	// The terminator is consumed but not stored; a final line without one
+	// is still returned. A line longer than the buffer is split.
+	size_t length = 0;
+	bool readAnything = false;
 	try {
-		while ((*ptr = ReadByte()) != endLine
-				&& (size_t)(ptr - buffer) < maxSize) {
-			ptr++;
+		while (length < maxSize - 1) {
+			const uint8 byte = ReadByte();
+			readAnything = true;
+			if (byte == static_cast<uint8>(endLine))
+				break;
+			buffer[length++] = static_cast<char>(byte);
 		}
 	} catch (std::exception& e) {
 		// eof
 	}
 
-	if (ptr > buffer) {
-		*(ptr - 1) = '\0';
-		return buffer;
-	}
+	if (!readAnything)
+		return NULL;
 
-	return NULL;
+	if (length > 0 && buffer[length - 1] == '\r')
+		length--;
+	buffer[length] = '\0';
+	return buffer;
 }
 
 
