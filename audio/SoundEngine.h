@@ -112,6 +112,9 @@ public:
 	void SetStreamVolume(float volume);
 	// Whether a stream is still playing (false once it ends or has faded out).
 	bool IsStreamPlaying() const;
+	// The stream that plays (or played last), NULL if none; the engine owns it
+	// and deletes it when another one replaces it.
+	AudioStream* Stream() const;
 	// Milliseconds of the current stream played so far.
 	uint32 StreamPositionMs() const;
 	float StreamVolume() const;

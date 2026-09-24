@@ -476,6 +476,13 @@ SoundEngine::IsStreamPlaying() const
 }
 
 
+AudioStream*
+SoundEngine::Stream() const
+{
+	return fMusic.stream;
+}
+
+
 uint32
 SoundEngine::StreamPositionMs() const
 {
