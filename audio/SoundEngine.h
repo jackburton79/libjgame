@@ -13,34 +13,29 @@
 #include <vector>
 
 // One slot of SoundEngine's one-shot sound-effect pool - see PlaySample().
-// `device` is really an SDL_AudioDeviceID (a plain uint32 typedef); kept
-// as uint32 here rather than pulling SDL.h into this header, which every
-// other file including SoundEngine.h would otherwise inherit.
+// The sound is converted when it is queued, so `data` is always interleaved
+// stereo 16 bit at the mixer's rate and the audio callback only has to add it.
 struct OneShotSound {
-	uint32 device = 0;
-	std::vector<uint8> data;
-	uint32 position = 0;
+	std::vector<int16> data;
+	uint32 position = 0;		// in samples (a stereo frame is two)
 	bool active = false;
-	uint16 channels = 0;
-	uint16 bitsPerSample = 0;
-	uint32 sampleRate = 0;
 };
 
 
-// The engine's music slot: one AudioStream on a device of its own, with a
-// volume and a fade (see SoundEngine::PlayStream()).
+// The engine's music slot: one AudioStream, with a volume and a fade (see
+// SoundEngine::PlayStream()). `converter` turns the stream's PCM into the
+// mixer's format (really an SDL_AudioStream*; void* keeps SDL.h out of here).
 struct StreamSlot {
-	uint32 device = 0;
 	AudioStream* stream = nullptr;
-	uint16 channels = 0;
-	uint32 sampleRate = 0;
+	void* converter = nullptr;
+	bool sourceEnded = false;	// the stream has nothing more to give
 	float volume = 1.0f;		// the bus volume
 	float gain = 1.0f;		// the fade's current level, 0-1
 	float gainStep = 0.0f;		// per sample frame; 0 = no fade running
 	float gainTarget = 1.0f;
 	bool stopAtTarget = false;	// a fade out ends the stream
 	bool finished = true;		// nothing (left) to play
-	uint64 framesPlayed = 0;
+	uint64 framesPlayed = 0;	// at the mixer's rate
 };
 
 
@@ -74,8 +69,15 @@ private:
 };
 
 
+// Everything goes through one audio device, opened the first time something
+// is played: the music stream, the one-shot samples and the raw buffer below
+// are mixed together in its callback. (Opening a device per sound does not
+// work on every platform; Haiku, for one, can't open several at once.)
 class SoundEngine {
 public:
+	// The mixer's output format
+	static const uint32 kMixSampleRate = 44100;
+
 	static bool Initialize();
 	static void Destroy();
 
@@ -91,21 +93,19 @@ public:
 	void StartStopAudio();
 	bool IsPlaying();
 
-	// Plays `data` (already-decoded raw PCM) once, on its own SDL audio
-	// device - unlike the single continuous ring buffer above (built for
-	// MVE movie audio, one stream at a time), this can overlap with the
-	// movie stream and with other PlaySample() calls: each of up to
-	// kMaxOneShots simultaneous one-shots gets its own device. Reuses an
-	// idle pool slot already opened for the same format when possible;
-	// if every slot is busy, steals the first one (interrupting whatever
-	// it was playing) rather than dropping the new sound.
+	// Plays `data` (already-decoded raw PCM, any channel count and rate) once.
+	// Unlike the single continuous ring buffer above (built for MVE movie
+	// audio, one stream at a time), this can overlap with the movie stream and
+	// with other PlaySample() calls, up to kMaxOneShots at a time. If every
+	// slot is busy, the one that has played longest is cut off rather than
+	// dropping the new sound.
 	void PlaySample(const uint8* data, uint32 dataSize, uint16 channels,
 		uint16 bitsPerSample, uint32 sampleRate);
 
-	// Streams `stream` (which the engine takes over) on the music device, after
-	// stopping the one already playing. `volume` is 0-1; a `fadeInMs` above 0
+	// Streams `stream` (which the engine takes over, any channel count and
+	// rate) as the music, after stopping the one already playing. `volume` is 0-1; a `fadeInMs` above 0
 	// raises the volume from silence over that time. Returns false if the audio
-	// device can't be opened (the stream is deleted).
+	// audio device can't be opened (the stream is deleted).
 	bool PlayStream(AudioStream* stream, float volume = 1.0f, uint32 fadeInMs = 0);
 	// Ends the stream; with `fadeOutMs` above 0 it fades out first.
 	void StopStream(uint32 fadeOutMs = 0);
@@ -125,18 +125,27 @@ public:
 
 private:
 	SoundBuffer* fBuffer;
+	void* fBufferConverter;		// the raw buffer's PCM to the mixer's format
+	bool fBufferActive;
 	bool fPlaying;
+	uint32 fDevice;				// the SDL_AudioDeviceID, 0 until opened
 
 	static const uint8 kMaxOneShots = 8;
 	OneShotSound fOneShots[kMaxOneShots];
 	StreamSlot fMusic;
+	std::vector<int32> fMixScratch;		// preallocated: the callback must not allocate
+	std::vector<float> fGainScratch;
 
-	void _CloseStreamDevice();
+	bool _EnsureDevice();
+	void _LockDevice();
+	void _UnlockDevice();
+
+	void _Mix(int16* out, uint32 frames);
+	void _MixStream(int32* mix, uint32 frames);
+	void _MixBuffer(int32* mix, uint32 frames);
 
 	SoundEngine();
 	~SoundEngine();
 
-	static void MixAudio(void *unused, uint8 *stream, int len);
-	static void MixOneShot(void* userData, uint8* stream, int len);
-	static void MixStream(void* userData, uint8* stream, int len);
+	static void MixCallback(void* userData, uint8* stream, int len);
 };
