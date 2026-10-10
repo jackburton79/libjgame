@@ -244,7 +244,7 @@ Bitmap::FillRect(const GFX::rect& rect, const uint32 color)
 {
 	SDL_Rect sdlRect;
 	GFXRectToSDLRect(&rect, &sdlRect);
-	SDL_FillRect(fSurface, &sdlRect, (Uint8)color);
+	SDL_FillRect(fSurface, &sdlRect, color);
 }
 
 
