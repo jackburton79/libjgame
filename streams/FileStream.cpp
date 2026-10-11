@@ -134,3 +134,27 @@ FileStream::Write(const void *src, size_t count)
 {
 	return ::fwrite(src, 1, count, fFileHandle);
 }
+
+
+/* static */
+bool
+FileStream::WriteAtomic(const char *filename, const void *data, size_t size)
+{
+	std::string temp = filename;
+	temp += ".tmp";
+
+	FILE* file = ::fopen(temp.c_str(), "wb");
+	if (file == NULL)
+		return false;
+
+	// What is written may still be in a buffer: closing is what can fail
+	bool written = ::fwrite(data, 1, size, file) == size;
+	if (::fclose(file) != 0)
+		written = false;
+
+	if (!written || ::rename(temp.c_str(), filename) != 0) {
+		::remove(temp.c_str());
+		return false;
+	}
+	return true;
+}

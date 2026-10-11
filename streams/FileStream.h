@@ -42,6 +42,11 @@ public:
 
 	virtual ssize_t Write(const void *src, size_t count);
 
+	// Writes a whole file so that it is never left half written: the data
+	// goes to "<filename>.tmp", which then takes the file's place. False (and
+	// the old file, if any, untouched) if it can't be written.
+	static bool WriteAtomic(const char *filename, const void *data, size_t size);
+
 private:
 	FILE *fFileHandle;
 };
