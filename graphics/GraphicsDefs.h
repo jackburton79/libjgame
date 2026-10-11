@@ -13,12 +13,35 @@ struct SDL_Rect;
 
 namespace GFX {
 
+// Laid out like an SDL_Color
 struct Color {
 	uint8 r;
 	uint8 g;
 	uint8 b;
 	uint8 a;
+
+	// Not set to anything, like a plain number (Color() is all zeros)
+	Color() = default;
+	// Opaque, unless it says otherwise
+	constexpr Color(uint8 red, uint8 green, uint8 blue, uint8 alpha = 255)
+		:
+		r(red),
+		g(green),
+		b(blue),
+		a(alpha)
+	{
+	}
 };
+
+inline bool operator==(const Color& a, const Color& b)
+{
+	return a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a;
+}
+
+inline bool operator!=(const Color& a, const Color& b)
+{
+	return !(a == b);
+}
 
 
 // The colour with its hue turned by `hue` degrees and its saturation and

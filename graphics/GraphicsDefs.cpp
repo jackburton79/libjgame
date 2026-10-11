@@ -47,8 +47,7 @@ Tinted(const Color& color, float hue, float saturation, float value)
 	else if (h < 300) { rr = x; bb = cc; }
 	else { rr = cc; bb = x; }
 	auto byte = [](float f) { return (uint8)std::lround(std::min(1.0f, std::max(0.0f, f)) * 255); };
-	Color tinted = { byte(rr + m), byte(gg + m), byte(bb + m), color.a };
-	return tinted;
+	return Color(byte(rr + m), byte(gg + m), byte(bb + m), color.a);
 }
 
 
@@ -57,16 +56,14 @@ Blended(const Color& from, const Color& to, float amount)
 {
 	amount = std::min(1.0f, std::max(0.0f, amount));
 	auto mix = [&](int a, int b) { return (uint8)std::lround(a * (1 - amount) + b * amount); };
-	Color blended = { mix(from.r, to.r), mix(from.g, to.g), mix(from.b, to.b), mix(from.a, to.a) };
-	return blended;
+	return Color(mix(from.r, to.r), mix(from.g, to.g), mix(from.b, to.b), mix(from.a, to.a));
 }
 
 
 Color
 Darkened(const Color& color, float amount)
 {
-	const Color black = { 0, 0, 0, color.a };
-	return Blended(color, black, amount);
+	return Blended(color, Color(0, 0, 0, color.a), amount);
 }
 
 
