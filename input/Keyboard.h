@@ -17,6 +17,15 @@ public:
 		KEY_E, KEY_P, KEY_R, KEY_Z, KEY_X,
 		KEY_SPACE, KEY_RETURN, KEY_ESCAPE,
 		KEY_LSHIFT, KEY_RSHIFT,
+		// The rest of the letters, the digits (the top row), the function keys and the
+		// editing and modifier keys
+		KEY_B, KEY_C, KEY_F, KEY_G, KEY_H, KEY_I, KEY_J, KEY_K,
+		KEY_L, KEY_M, KEY_N, KEY_O, KEY_Q, KEY_T, KEY_U, KEY_V,
+		KEY_Y,
+		KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9,
+		KEY_F1, KEY_F2, KEY_F3, KEY_F4, KEY_F5, KEY_F6, KEY_F7, KEY_F8, KEY_F9, KEY_F10, KEY_F11, KEY_F12,
+		KEY_TAB, KEY_BACKSPACE, KEY_DELETE, KEY_INSERT, KEY_HOME, KEY_END,
+		KEY_PAGEUP, KEY_PAGEDOWN, KEY_LCTRL, KEY_RCTRL, KEY_LALT, KEY_RALT,
 		KEY_COUNT
 	};
 
