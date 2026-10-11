@@ -10,16 +10,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - name: sdl-install 
+      run: sudo apt update && sudo apt install -y libsdl2-dev
     - uses: actions/checkout@v6
       with:
         fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
         submodules: recursive
-    - name: sdl-get
-      run: wget https://www.libsdl.org/release/SDL2-2.30.12.tar.gz -O SDL2-2.30.12.tar.gz
-    - name: sdl-extract
-      run: tar -xzvf SDL2-2.30.12.tar.gz
-    - name: sdl-build
-      run: (cd SDL2-2.30.12 && ./configure && make && sudo make install)
     - name: build-all
       run: make
     - name: build-tests
