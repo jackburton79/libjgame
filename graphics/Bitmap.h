@@ -60,6 +60,13 @@ public:
 				int32 xOffset, int32 yOffset);
 
 	void FillRect(const GFX::rect& rect, const uint32 color);
+	// Paints only some of the rect's pixels, in a regular pattern (an ordered
+	// dither): `level` of every kDitherLevels, so 0 paints nothing, half of
+	// them is a chequerboard and kDitherLevels is a plain FillRect(). It
+	// darkens or tints what is there without blending. The pattern follows
+	// the bitmap, not the rect, so rects next to each other fit together.
+	static const uint8 kDitherLevels = 16;
+	void FillRectDithered(const GFX::rect& rect, const uint32 color, uint8 level);
 	void FillPolygon(const Polygon& polygon, const uint32 color);
 	void FillPolygon(const Polygon& polygon, const uint32 color,
 					int32 xOffset, int32 yOffset);

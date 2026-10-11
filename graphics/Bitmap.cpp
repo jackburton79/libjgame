@@ -249,6 +249,29 @@ Bitmap::FillRect(const GFX::rect& rect, const uint32 color)
 
 
 void
+Bitmap::FillRectDithered(const GFX::rect& rect, const uint32 color, uint8 level)
+{
+	// The order in which the pixels of each 4x4 square get painted (a Bayer matrix)
+	static const uint8 kOrder[4][4] = {
+		{ 0, 8, 2, 10 }, { 12, 4, 14, 6 }, { 3, 11, 1, 9 }, { 15, 7, 13, 5 }
+	};
+	if (level == 0)
+		return;
+
+	const int left = std::max((int)rect.x, 0);
+	const int top = std::max((int)rect.y, 0);
+	const int right = std::min((int)rect.x + rect.w, fSurface->w);
+	const int bottom = std::min((int)rect.y + rect.h, fSurface->h);
+	for (int y = top; y < bottom; y++) {
+		for (int x = left; x < right; x++) {
+			if (kOrder[y & 3][x & 3] < level)
+				PutPixel(x, y, color);
+		}
+	}
+}
+
+
+void
 Bitmap::StrokePolygon(const Polygon& polygon, const uint32 color)
 {
 	const int32 numPoints = polygon.CountPoints();
