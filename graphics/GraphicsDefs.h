@@ -21,6 +21,16 @@ struct Color {
 };
 
 
+// The colour with its hue turned by `hue` degrees and its saturation and
+// brightness multiplied by `saturation` and `value` (0, 1, 1 leaves it as it
+// is). The alpha stays.
+Color Tinted(const Color& color, float hue, float saturation, float value);
+// The colour `amount` of the way (0-1) from `from` to `to`
+Color Blended(const Color& from, const Color& to, float amount);
+// The colour `amount` of the way (0-1) to black
+Color Darkened(const Color& color, float amount);
+
+
 class Palette {
 public:
 	Palette();

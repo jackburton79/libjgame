@@ -9,10 +9,66 @@
 
 #include "Bitmap.h"
 
+#include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <SDL.h>
 
 namespace GFX {
+
+Color
+Tinted(const Color& color, float hue, float saturation, float value)
+{
+	// RGB -> HSV, turn, and back
+	const float r = color.r / 255.0f, g = color.g / 255.0f, b = color.b / 255.0f;
+	const float mx = std::max(r, std::max(g, b)), mn = std::min(r, std::min(g, b)), d = mx - mn;
+	float h = 0;
+	if (d > 0) {
+		if (mx == r)
+			h = std::fmod((g - b) / d, 6.0f);
+		else if (mx == g)
+			h = (b - r) / d + 2;
+		else
+			h = (r - g) / d + 4;
+		h *= 60;
+		if (h < 0)
+			h += 360;
+	}
+	float s = mx > 0 ? d / mx : 0, v = mx;
+	h = std::fmod(h + hue + 720.0f, 360.0f);
+	s = std::min(1.0f, std::max(0.0f, s * saturation));
+	v = std::min(1.0f, std::max(0.0f, v * value));
+	const float cc = v * s, x = cc * (1 - std::fabs(std::fmod(h / 60, 2.0f) - 1)), m = v - cc;
+	float rr = 0, gg = 0, bb = 0;
+	if (h < 60) { rr = cc; gg = x; }
+	else if (h < 120) { rr = x; gg = cc; }
+	else if (h < 180) { gg = cc; bb = x; }
+	else if (h < 240) { gg = x; bb = cc; }
+	else if (h < 300) { rr = x; bb = cc; }
+	else { rr = cc; bb = x; }
+	auto byte = [](float f) { return (uint8)std::lround(std::min(1.0f, std::max(0.0f, f)) * 255); };
+	Color tinted = { byte(rr + m), byte(gg + m), byte(bb + m), color.a };
+	return tinted;
+}
+
+
+Color
+Blended(const Color& from, const Color& to, float amount)
+{
+	amount = std::min(1.0f, std::max(0.0f, amount));
+	auto mix = [&](int a, int b) { return (uint8)std::lround(a * (1 - amount) + b * amount); };
+	Color blended = { mix(from.r, to.r), mix(from.g, to.g), mix(from.b, to.b), mix(from.a, to.a) };
+	return blended;
+}
+
+
+Color
+Darkened(const Color& color, float amount)
+{
+	const Color black = { 0, 0, 0, color.a };
+	return Blended(color, black, amount);
+}
+
 
 	// TODO: Move away from here: we use these from bgemu 
 GFX::Palette* kPaletteRed;
