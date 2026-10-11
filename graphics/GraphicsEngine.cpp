@@ -316,8 +316,9 @@ GraphicsEngine::SetVideoMode(uint16 width, uint16 height, uint16 depth,
 		fRenderContext->SDLTexture = nullptr;
 	}
 
-	// TODO: add parameter to control this
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
+	// Read when the texture is created: smooth scaling, unless asked otherwise
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY,
+		(flags & VIDEOMODE_PIXELATED) ? "nearest" : "linear");
 	SDL_RenderSetLogicalSize(fRenderContext->SDLRenderer, width, height);
 
 	// TODO: We don't respect the depth parameter
@@ -336,6 +337,18 @@ GraphicsEngine::SetVideoMode(uint16 width, uint16 height, uint16 depth,
 	// Center cursor in window
 	SDL_WarpMouseInWindow(fRenderContext->SDLWindow,
 						fScreen->Width() / 2, fScreen->Height() / 2);
+}
+
+
+void
+GraphicsEngine::SetWindowSize(uint16 width, uint16 height)
+{
+	SDL_Window* window = fRenderContext->SDLWindow;
+	if (window == nullptr || (fFlags & VIDEOMODE_FULLSCREEN))
+		return;
+
+	SDL_SetWindowSize(window, width, height);
+	SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 }
 
 

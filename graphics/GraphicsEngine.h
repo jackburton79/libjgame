@@ -43,9 +43,15 @@ public:
 
 	enum VIDEOMODE_FLAGS {
 		VIDEOMODE_WINDOWED = 0,
-		VIDEOMODE_FULLSCREEN = 1
+		VIDEOMODE_FULLSCREEN = 1,
+		// Scale the screen to the window without smoothing (for pixel art)
+		VIDEOMODE_PIXELATED = 2
 	};
 	void SetVideoMode(uint16 x, uint16 y, uint16 depth, uint16 flags);
+	// The window can have a size of its own: the screen is scaled to fit it,
+	// keeping its proportions. A game can then draw at a low resolution and
+	// show it bigger. Call it after SetVideoMode().
+	void SetWindowSize(uint16 width, uint16 height);
 	void SaveCurrentMode();
 	void RestorePreviousMode();
 
