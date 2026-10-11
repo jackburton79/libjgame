@@ -86,7 +86,8 @@ public:
 	static Bitmap* Load(const char* fileName);
 	static Bitmap* Load(const void* data, const size_t size);
 
-	void Save(const char* fileName) const;
+	// As a BMP; false if the file can't be written
+	bool Save(const char* fileName) const;
 	void Dump() const;
 
 protected:

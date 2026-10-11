@@ -558,10 +558,10 @@ Bitmap::Load(const void* data, const size_t size)
 }
 
 
-void
+bool
 Bitmap::Save(const char* fileName) const
 {
-	SDL_SaveBMP(fSurface, fileName);
+	return SDL_SaveBMP(fSurface, fileName) == 0;
 }
 
 
@@ -570,12 +570,17 @@ Bitmap::Mirror()
 {
 	SDL_LockSurface(fSurface);
 
+	// Swap whole pixels, whatever their size
+	const int bytesPerPixel = fSurface->format->BytesPerPixel;
 	uint8* sourcePixels = reinterpret_cast<uint8*>(fSurface->pixels);
 	for (int y = 0; y < fSurface->h; y++) {
-		uint8* destPtr = reinterpret_cast<uint8*>(sourcePixels) + fSurface->w - 1;
+		uint8* destPtr = sourcePixels + (fSurface->w - 1) * bytesPerPixel;
 		uint8* sourcePtr = sourcePixels;
-		while (sourcePtr < destPtr)
-			std::swap(*sourcePtr++, *destPtr--);
+		while (sourcePtr < destPtr) {
+			std::swap_ranges(sourcePtr, sourcePtr + bytesPerPixel, destPtr);
+			sourcePtr += bytesPerPixel;
+			destPtr -= bytesPerPixel;
+		}
 		sourcePixels += fSurface->pitch;
 	}
 	SDL_UnlockSurface(fSurface);
