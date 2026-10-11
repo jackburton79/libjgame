@@ -15,11 +15,11 @@ jobs:
         fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
         submodules: recursive
     - name: sdl-get
-      run: wget https://www.libsdl.org/release/SDL2-2.0.30.tar.gz -O SDL2-2.0.30.tar.gz
+      run: wget https://www.libsdl.org/release/SDL2-2.30.12.tar.gz -O SDL2-2.30.12.tar.gz
     - name: sdl-extract
-      run: tar -xzvf SDL2-2.0.30.tar.gz
+      run: tar -xzvf SDL2-2.30.12.tar.gz
     - name: sdl-build
-      run: (cd SDL2-2.0.30 && ./configure && make && sudo make install)
+      run: (cd SDL2-2.30.12 && ./configure && make && sudo make install)
     - name: build-all
       run: make
     - name: build-tests
