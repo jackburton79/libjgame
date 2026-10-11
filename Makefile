@@ -36,7 +36,7 @@ endif
 
 -include $(DEPS)
 
-.PHONY: all clean echoes tests
+.PHONY: all clean echoes tests test
 
 all: $(OUTDIR)/$(GAMELIB)
 
@@ -55,6 +55,14 @@ TEST_SRCS := $(wildcard $(TESTDIR)/*.cpp)
 TESTS := $(patsubst $(TESTDIR)/%.cpp,$(TESTBINDIR)/%,$(TEST_SRCS))
 
 tests: $(TESTS)
+
+# Runs every test, with no screen and no sound card, and stops at the first one
+# that fails
+test: tests
+	@for t in $(TESTS); do \
+		echo "== $$t"; \
+		SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy $$t || exit 1; \
+	done
 
 $(TESTBINDIR)/%: $(TESTDIR)/%.cpp $(OUTDIR)/$(GAMELIB)
 	mkdir -p $(@D)

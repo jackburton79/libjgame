@@ -25,10 +25,4 @@ jobs:
     - name: build-tests
       run: make tests
     - name: run-tests
-      run: |
-        for t in test/*; do
-          if [ -x "$t" ] && [ ! -d "$t" ]; then
-            echo "Running $t"
-            "$t"
-          fi
-        done
+      run: make test
