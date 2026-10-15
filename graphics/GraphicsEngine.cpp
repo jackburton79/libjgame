@@ -352,6 +352,20 @@ GraphicsEngine::SetWindowSize(uint16 width, uint16 height)
 }
 
 
+SDL_Window*
+GraphicsEngine::Window() const
+{
+	return fRenderContext->SDLWindow;
+}
+
+
+SDL_Renderer*
+GraphicsEngine::Renderer() const
+{
+	return fRenderContext->SDLRenderer;
+}
+
+
 void
 GraphicsEngine::SaveCurrentMode()
 {
