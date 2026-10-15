@@ -73,12 +73,10 @@ Bitmap::SetColors(const GFX::Color* colors, uint8 start, int num)
 void
 Bitmap::SetColors(const GFX::Color& color, uint8 start, int num)
 {
-	struct GFX::Color colorList[num];
-	for (int i = 0; i < num; i++) {
-		colorList[i] = color;
-	}
+	// (not an array of a size known only when running: that is not C++, and clang says so)
+	std::vector<GFX::Color> colorList(num > 0 ? num : 0, color);
 	SDL_SetPaletteColors(fSurface->format->palette,
-			reinterpret_cast<const SDL_Color*>(colorList), start, num);
+			reinterpret_cast<const SDL_Color*>(colorList.data()), start, num);
 }
 
 

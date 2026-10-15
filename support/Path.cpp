@@ -23,6 +23,27 @@
 using namespace std;
 
 
+// The path with its symbolic links and "." and ".." resolved, in memory to be free()d, or NULL (and errno
+// set). Windows has no realpath(): _fullpath() does the same, but it writes backslashes and the rest of
+// this file wants slashes.
+static char*
+resolve_path(const char* path)
+{
+#ifdef _WIN32
+	char* resolved = _fullpath(NULL, path, 0);
+	if (resolved != NULL) {
+		for (char* c = resolved; *c != '\0'; c++) {
+			if (*c == '\\')
+				*c = '/';
+		}
+	}
+	return resolved;
+#else
+	return realpath(path, NULL);
+#endif
+}
+
+
 static bool
 is_absolute_path(const char *path)
 {
@@ -142,7 +163,7 @@ Path::SetTo(const char* path, const char* leaf, bool normalize)
 		// normalize the path, if necessary, otherwise just set it
 		if (error == 0) {
 			if (normalize) {
-				char* resolvedPath = realpath(newPath, NULL);
+				char* resolvedPath = resolve_path(newPath);
 				if (resolvedPath != NULL) {
 					error = SetTo(resolvedPath);
 					::free(resolvedPath);
