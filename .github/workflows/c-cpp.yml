@@ -22,3 +22,20 @@ jobs:
       run: make tests
     - name: run-tests
       run: make test
+
+  # The same on a Mac (Apple's clang, SDL2 from Homebrew)
+  macos:
+    runs-on: macos-latest
+    steps:
+    - name: sdl-install
+      run: brew install sdl2
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+        submodules: recursive
+    - name: build-all
+      run: make -j$(sysctl -n hw.ncpu)
+    - name: build-tests
+      run: make tests -j$(sysctl -n hw.ncpu)
+    - name: run-tests
+      run: make test

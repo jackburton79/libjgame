@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <dirent.h>
+#include <filesystem>
 
 #include "Utils.h"
 
@@ -152,7 +153,12 @@ FileStream::WriteAtomic(const char *filename, const void *data, size_t size)
 	if (::fclose(file) != 0)
 		written = false;
 
-	if (!written || ::rename(temp.c_str(), filename) != 0) {
+	// (std::filesystem::rename() replaces a file that is there already on every system; the C rename()
+	// refuses to on Windows, where saving over the last save would never work)
+	std::error_code renameError;
+	if (written)
+		std::filesystem::rename(temp, filename, renameError);
+	if (!written || renameError) {
 		::remove(temp.c_str());
 		return false;
 	}

@@ -4,6 +4,8 @@
 #include "GraphicsDefs.h"
 
 class Bitmap;
+struct SDL_Window;
+struct SDL_Renderer;
 class GraphicsEngine {
 public:
 	struct RenderContext;
@@ -52,6 +54,9 @@ public:
 	// keeping its proportions. A game can then draw at a low resolution and
 	// show it bigger. Call it after SetVideoMode().
 	void SetWindowSize(uint16 width, uint16 height);
+	// The SDL window and renderer the engine draws on (null before SetVideoMode())
+	SDL_Window* Window() const;
+	SDL_Renderer* Renderer() const;
 	void SaveCurrentMode();
 	void RestorePreviousMode();
 

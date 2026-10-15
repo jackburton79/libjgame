@@ -35,8 +35,7 @@ main()
 		"the screen took the window's size");
 	CHECK(gfx->ScreenBitmap()->Width() == 320, "the screen bitmap took the window's size");
 
-	// The engine's window is the first (and only) one
-	SDL_Window* window = SDL_GetWindowFromID(1);
+	SDL_Window* window = gfx->Window();
 	int width = 0, height = 0;
 	if (window != nullptr)
 		SDL_GetWindowSize(window, &width, &height);
@@ -56,7 +55,7 @@ main()
 	screen->FillRect(GFX::rect(0, 0, 160, 240), red);
 	screen->FillRect(GFX::rect(160, 0, 160, 240), blue);
 	gfx->Update();
-	SDL_Renderer* renderer = window != nullptr ? SDL_GetRenderer(window) : nullptr;
+	SDL_Renderer* renderer = gfx->Renderer();
 	uint32 row[960];
 	SDL_Rect line = { 0, 360, 960, 1 };
 	if (renderer == nullptr || SDL_RenderReadPixels(renderer, &line,
