@@ -24,7 +24,8 @@ OBJS := $(addprefix $(OBJDIR)/,$(SRCS:.cpp=.o))
 DEPS := $(OBJS:.o=.d)
 
 CPPFLAGS := -I. $(addprefix -I,$(SUBDIRS))
-CXXFLAGS := -Wall -Werror $(shell sdl2-config --cflags)
+# (C++17: the code uses structured bindings, which a compiler whose default is older refuses)
+CXXFLAGS := -std=c++17 -Wall -Werror $(shell sdl2-config --cflags)
 
 DEBUG ?= 0
 
