@@ -1,5 +1,7 @@
 // A font of the game's own: a class that derives from Font and a FontLoader
-// that gives it out, used through the interface like the built-in one.
+// that gives it out, used through the interface like the built-in one. Also
+// a font like one made from artwork (glyph offsets, colours of its own, missing
+// characters, an 8 bit target), which is the other kind of font a game has.
 #include <jgame/Bitmap.h>
 #include <jgame/Font.h>
 #include <jgame/FontLoader.h>
@@ -31,6 +33,28 @@ public:
 	{
 		if (ch != ' ')
 			target->FillRect(GFX::rect(x, y, 4 * scale, 4 * scale), color);
+	}
+};
+
+// A font like one made from artwork: glyphs of different sizes that sit on a
+// baseline, colours of their own, and characters it hasn't got
+class ArtFont : public Font {
+public:
+	static const uint32 kInk = 7;		// what every glyph is painted with
+
+	virtual int Height() const override { return 6; }
+	virtual int Advance(uint8 ch) const override { return GlyphWidth(ch); }
+	virtual int GlyphWidth(uint8 ch) const override
+	{
+		return ch == 'x' || ch == 'g' ? 3 : 0;
+	}
+	virtual void DrawGlyph(Bitmap* target, int x, int y, uint8 ch, uint32,
+		int scale) const override
+	{
+		if (ch == 'x')		// small: sits on the baseline, 2 down
+			target->FillRect(GFX::rect(x, y + 2 * scale, 3 * scale, 2 * scale), kInk);
+		else if (ch == 'g')	// tall, with a tail: 1 down
+			target->FillRect(GFX::rect(x, y + 1 * scale, 3 * scale, 4 * scale), kInk);
 	}
 };
 
@@ -98,6 +122,26 @@ main()
 	CHECK(bitmap->GetPixel(28, 5) != black, "the shadow covered the text");
 
 	bitmap->Release();
+
+	// Glyphs with offsets, colours of their own and characters that are missing
+	ArtFont art;
+	CHECK(art.TextWidth("xgx") == 9, "the glyphs' widths don't add up");
+	CHECK(art.TextWidth("xq") == 3, "a missing last character has a width");
+	CHECK(art.TextWidth("qx") == 3, "a missing character takes room");
+	CHECK(art.TextWidth("xqg") == 6, "a missing character in the middle takes room");
+
+	Bitmap* indexed = new Bitmap(20, 10, 8);
+	indexed->Clear(0);
+	art.DrawText(indexed, 1, 0, "xqg", 99);	// 99: not the font's business
+	CHECK(CountPixels(indexed, ArtFont::kInk) == 6 + 12, "the glyphs aren't all there");
+	CHECK(indexed->GetPixel(1, 2) == ArtFont::kInk && indexed->GetPixel(3, 3) == ArtFont::kInk,
+		"the small glyph isn't where its offset puts it");
+	CHECK(indexed->GetPixel(1, 1) == 0, "the small glyph is higher than its offset");
+	CHECK(indexed->GetPixel(4, 1) == ArtFont::kInk && indexed->GetPixel(6, 4) == ArtFont::kInk,
+		"the second glyph isn't right after the first");
+	CHECK(indexed->GetPixel(4, 0) == 0 && indexed->GetPixel(4, 5) == 0,
+		"the tall glyph isn't where its offset puts it");
+	indexed->Release();
 
 	if (sFailures == 0)
 		std::printf("CustomFontTest: all good\n");

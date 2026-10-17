@@ -32,13 +32,17 @@ public:
 	// How tall a line of text is
 	virtual int Height() const = 0;
 	// How far the pen moves to the right after `ch`: its width and the space
-	// that follows
+	// that follows. 0 for a character the font doesn't have, which is skipped.
 	virtual int Advance(uint8 ch) const = 0;
-	// How wide `ch` is, without the space after it
+	// How wide `ch` is, without the space after it (0 if the font hasn't got it)
 	virtual int GlyphWidth(uint8 ch) const = 0;
-	// Draws `ch` with its top left corner at (x, y), each pixel of the font a
-	// square of `scale` by `scale`. Draws nothing for a character the font
-	// doesn't have.
+	// Draws `ch` in the line whose top left corner is (x, y): the font puts the
+	// glyph where it belongs inside the line (a letter with a tail goes lower
+	// than one without, and a font whose glyphs have offsets of their own applies
+	// them), each pixel of the font a square of `scale` by `scale`. `color` is in
+	// the target's pixel format (what Bitmap::MapRGBColor() gives); a font with
+	// colours of its own, made from artwork, is free to ignore it. Draws nothing
+	// for a character the font doesn't have.
 	virtual void DrawGlyph(Bitmap* target, int x, int y, uint8 ch, uint32 color,
 		int scale = 1) const = 0;
 
