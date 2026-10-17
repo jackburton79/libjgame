@@ -10,6 +10,7 @@
 
 
 #include <iostream>
+#include <mutex>
 #include <sys/time.h>
 
 #include <SDL.h>
@@ -18,7 +19,11 @@
 Timer::timer_map Timer::sNamedTimers;
 
 static std::map<SDL_TimerID, Timer::Functor*> sPeriodicTimers;
+// The one-shot callbacks run on SDL's timer thread and take themselves out of
+// sOneShotTimers there: everything that touches it holds this lock. A Functor
+// is freed by whoever takes it out of the map, so it is freed once.
 static std::map<SDL_TimerID, Timer::Functor*> sOneShotTimers;
+static std::mutex sOneShotLock;
 
 Timer::Timer(uint32 delay)
 	:
@@ -48,10 +53,13 @@ Timer::TearDown()
 	sNamedTimers.clear();
 
 	for (auto [id, functor] : sPeriodicTimers) {
+		// Or it would go on firing with a deleted Functor
+		SDL_RemoveTimer(id);
 		delete functor;
 	}
 	sPeriodicTimers.clear();
 
+	std::lock_guard<std::mutex> lock(sOneShotLock);
 	for (auto [id, functor] : sOneShotTimers) {
 		// Cancel first: without this, a timer whose delay is about to
 		// elapse could still fire (SDL timers run on their own thread)
@@ -106,6 +114,16 @@ oneshot_timer_callback(uint32 interval, void* castToFunctor)
 {
 	Timer::Functor* functor = reinterpret_cast<Timer::Functor*>(castToFunctor);
 
+	std::lock_guard<std::mutex> lock(sOneShotLock);
+	// Not in the map: TearDown() cancelled it (and freed it) while this was
+	// already on its way
+	auto i = sOneShotTimers.begin();
+	while (i != sOneShotTimers.end() && i->second != functor)
+		i++;
+	if (i == sOneShotTimers.end())
+		return 0;
+	sOneShotTimers.erase(i);
+
 	SDL_UserEvent userevent;
 	userevent.type = SDL_USEREVENT;
 	userevent.code = 0;
@@ -116,14 +134,6 @@ oneshot_timer_callback(uint32 interval, void* castToFunctor)
 	event.type = SDL_USEREVENT;
 	event.user = userevent;
 	SDL_PushEvent(&event);
-
-	// Firing normally: stop tracking it before freeing it
-	for (auto i = sOneShotTimers.begin(); i != sOneShotTimers.end(); i++) {
-		if (i->second == functor) {
-			sOneShotTimers.erase(i);
-			break;
-		}
-	}
 
 	delete functor;
 
@@ -156,8 +166,15 @@ int
 Timer::AddOneShotTimer(uint32 delay, timer_function func, void* parameter)
 {
 	Functor* functor = new Functor(func, parameter);
+	// Held until the timer is in the map, or a short one could fire first,
+	// not find itself, and never run
+	std::lock_guard<std::mutex> lock(sOneShotLock);
 	SDL_TimerID id = SDL_AddTimer(delay, oneshot_timer_callback,
 								reinterpret_cast<void*>(functor));
+	if (id == 0) {
+		delete functor;
+		return 0;
+	}
 	sOneShotTimers[id] = functor;
 	return id;
 }
@@ -178,10 +195,11 @@ Timer::AddPeriodicTimer(uint32 interval, timer_function func, void* parameter)
 void
 Timer::RemovePeriodicTimer(int id)
 {
-	SDL_RemoveTimer(id);
 	auto t = sPeriodicTimers.find(id);
-	if (t != sPeriodicTimers.end())
-		delete t->second;
+	if (t == sPeriodicTimers.end())
+		return;
+	SDL_RemoveTimer(id);
+	delete t->second;
 	sPeriodicTimers.erase(t);
 }
 

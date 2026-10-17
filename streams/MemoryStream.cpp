@@ -24,12 +24,6 @@ MemoryStream::MemoryStream(size_t size)
 }
 
 
-MemoryStream::MemoryStream(const MemoryStream& other)
-{
-	// private unimplemented
-}
-
-
 MemoryStream::~MemoryStream()
 {
 	if (fOwnsBuffer)
@@ -144,10 +138,13 @@ MemoryStream::Clone() const
 MemoryStream*
 MemoryStream::Adopt()
 {
-	MemoryStream* newStream = new MemoryStream(fData, Size(), true);
+	// The new stream gets the buffer as this one has it: freeing it only if
+	// this one would have
+	MemoryStream* newStream = new MemoryStream(fData, Size(), fOwnsBuffer);
 
 	fData = NULL;
 	fSize = 0;
+	fOwnsBuffer = false;
 
 	return newStream;
 }

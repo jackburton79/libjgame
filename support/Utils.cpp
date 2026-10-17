@@ -42,14 +42,15 @@ char*
 trim(char* string)
 {
 	char* newStringStart = string;
-	while (isspace(*newStringStart))
+	while (isspace((unsigned char)*newStringStart))
 		newStringStart++;
  
-	char* endOfString = newStringStart + ::strlen(newStringStart) - 1;
-	while (isspace(*endOfString))
+	// One past the last character: stopping at newStringStart keeps an
+	// empty or all-blank string from walking off the front of the buffer
+	char* endOfString = newStringStart + ::strlen(newStringStart);
+	while (endOfString > newStringStart && isspace((unsigned char)*(endOfString - 1)))
 		endOfString--;
- 
-	endOfString++;
+
 	*endOfString  = '\0';
 
 	return newStringStart;
