@@ -15,6 +15,7 @@
 #include <jgame/Events.h>
 #include <jgame/FileStream.h>
 #include <jgame/Font.h>
+#include <jgame/FontLoader.h>
 #include <jgame/GraphicsDefs.h>
 #include <jgame/GraphicsEngine.h>
 #include <jgame/Keyboard.h>

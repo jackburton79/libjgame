@@ -77,45 +77,89 @@ Find(char c)
 } // namespace
 
 
-namespace Font {
+Font::~Font()
+{
+}
+
 
 int
-TextWidth(const std::string& text, int scale)
+Font::TextWidth(const std::string& text, int scale) const
 {
 	if (text.empty())
 		return 0;
-	return ((int)text.size() * kAdvance - 1) * scale;
+	int width = 0;
+	for (size_t i = 0; i + 1 < text.size(); i++)
+		width += Advance((uint8)text[i]);
+	width += GlyphWidth((uint8)text[text.size() - 1]);
+	return width * scale;
 }
 
 
 void
-DrawText(Bitmap* target, int x, int y, const std::string& text, uint32 color, int scale)
+Font::DrawText(Bitmap* target, int x, int y, const std::string& text, uint32 color,
+	int scale) const
 {
 	for (char c : text) {
-		const Glyph* g = Find(c);
-		if (g != nullptr) {
-			for (int row = 0; row < kGlyphH; row++) {
-				for (int col = 0; col < kGlyphW; col++) {
-					if (g->rows[row][col] == '1')
-						target->FillRect(GFX::rect(x + col * scale, y + row * scale,
-							scale, scale), color);
-				}
-			}
-		}
-		x += kAdvance * scale;
+		DrawGlyph(target, x, y, (uint8)c, color, scale);
+		x += Advance((uint8)c) * scale;
 	}
 }
 
 
 void
-DrawCentered(Bitmap* target, int centreX, int y, const std::string& text,
-	uint32 color, int scale)
+Font::DrawCentered(Bitmap* target, int centreX, int y, const std::string& text,
+	uint32 color, int scale) const
 {
 	int x = centreX - TextWidth(text, scale) / 2;
 	DrawText(target, x + scale, y + scale, text, target->MapRGBColor(0, 0, 0), scale);
 	DrawText(target, x, y, text, color, scale);
 }
 
-} // namespace Font
+
+/* static */
+const Font&
+Font::Builtin()
+{
+	static const BuiltinFont font;
+	return font;
+}
+
+
+int
+BuiltinFont::Height() const
+{
+	return kGlyphH;
+}
+
+
+int
+BuiltinFont::Advance(uint8) const
+{
+	return kAdvance;
+}
+
+
+int
+BuiltinFont::GlyphWidth(uint8) const
+{
+	return kGlyphW;
+}
+
+
+void
+BuiltinFont::DrawGlyph(Bitmap* target, int x, int y, uint8 ch, uint32 color,
+	int scale) const
+{
+	const Glyph* g = Find((char)ch);
+	if (g == nullptr)
+		return;
+	for (int row = 0; row < kGlyphH; row++) {
+		for (int col = 0; col < kGlyphW; col++) {
+			if (g->rows[row][col] == '1')
+				target->FillRect(GFX::rect(x + col * scale, y + row * scale,
+					scale, scale), color);
+		}
+	}
+}
 
 } // namespace jgame

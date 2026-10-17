@@ -24,7 +24,8 @@ main()
 			Events::RequestQuit();
 
 		screen->Clear(screen->MapRGBColor(20, 20, 60));
-		Font::DrawCentered(screen, 160, 90, "HELLO JGAME", screen->MapRGBColor(255, 255, 255), 4);
+		Font::Builtin().DrawCentered(screen, 160, 90, "HELLO JGAME",
+			screen->MapRGBColor(255, 255, 255), 4);
 		gfx->Update();
 		Timer::Wait(16);
 	}
