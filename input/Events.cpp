@@ -4,6 +4,7 @@
 
 #include <jgame/Events.h>
 
+#include <jgame/Gamepad.h>
 #include <jgame/Keyboard.h>
 #include <jgame/Timer.h>
 
@@ -19,6 +20,7 @@ static bool sQuitRequested = false;
 void
 Events::Pump()
 {
+	Gamepad::_Initialize();
 	Keyboard::_BeginFrame();
 
 	SDL_Event event;
@@ -40,6 +42,7 @@ Events::Pump()
 				}
 				break;
 			default:
+				Gamepad::_HandleEvent(event);
 				break;
 		}
 	}
