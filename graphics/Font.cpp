@@ -116,6 +116,47 @@ Font::DrawCentered(Bitmap* target, int centreX, int y, const std::string& text,
 }
 
 
+std::string
+Font::TruncateString(std::string& string, int maxWidth, int* truncatedWidth,
+	int scale) const
+{
+	if (string.empty()) {
+		if (truncatedWidth != nullptr)
+			*truncatedWidth = 0;
+		return string;
+	}
+
+	// Try the whole string, then up to each space going backwards
+	size_t breakPos = string.length();
+	for (;;) {
+		std::string line = string.substr(0, breakPos);
+		const int width = TextWidth(line, scale);
+		if (width < maxWidth) {
+			if (truncatedWidth != nullptr)
+				*truncatedWidth = width;
+			string = breakPos == string.length() ? "" : string.substr(breakPos + 1);
+			return line;
+		}
+
+		const size_t space = breakPos > 0 ? string.rfind(' ', breakPos - 1)
+			: std::string::npos;
+		if (space == std::string::npos) {
+			// No space left to break at: the first word alone is too wide, so
+			// cut it where it fits (one character at least, to make progress)
+			size_t length = breakPos > 1 ? breakPos - 1 : 1;
+			while (length > 1 && TextWidth(string.substr(0, length), scale) >= maxWidth)
+				length--;
+			line = string.substr(0, length);
+			if (truncatedWidth != nullptr)
+				*truncatedWidth = TextWidth(line, scale);
+			string = string.substr(length);
+			return line;
+		}
+		breakPos = space;
+	}
+}
+
+
 /* static */
 const Font&
 Font::Builtin()

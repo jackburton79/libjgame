@@ -79,6 +79,61 @@ main()
 
 	bitmap->Release();
 
+	// TruncateString(): a line off the text. Every built-in glyph is 4 wide with a
+	// space of 1 after it, so n characters are 4n - 1 wide.
+	{
+		std::string text = "AB CD EF";		// 31 wide
+		int width = -1;
+		CHECK(font.TruncateString(text, 100, &width) == "AB CD EF" && text.empty() && width == 31,
+			"a text that fits wasn't all taken");
+
+		text = "AB CD EF";
+		CHECK(font.TruncateString(text, 20, &width) == "AB CD" && text == "EF" && width == 19,
+			"the line wasn't cut at the last space that fits");
+
+		// Narrower than maxWidth: 19 wide doesn't fit in 19
+		text = "AB CD EF";
+		CHECK(font.TruncateString(text, 19, &width) == "AB" && text == "CD EF" && width == 7,
+			"a line as wide as maxWidth fits");
+
+		text = "AB CD EF";
+		CHECK(font.TruncateString(text, 20, nullptr) == "AB CD", "no truncatedWidth, no line");
+
+		text = "AB CD";
+		CHECK(font.TruncateString(text, 20, &width, 2) == "AB" && text == "CD" && width == 14,
+			"the scale isn't used to measure the line");
+
+		// A word wider than the line is cut where it fits
+		text = "ABCDEFGH";
+		CHECK(font.TruncateString(text, 12, &width) == "ABC" && text == "DEFGH" && width == 11,
+			"a long word wasn't cut where it fits");
+
+		// Never an empty line from a text, whatever the width
+		text = "AB";
+		CHECK(font.TruncateString(text, 1, &width) == "A" && text == "B",
+			"a line narrower than a character isn't one character");
+		text = "AB";
+		CHECK(font.TruncateString(text, 0) == "A" && text == "B", "maxWidth 0 isn't one character");
+
+		text = "";
+		CHECK(font.TruncateString(text, 0, &width).empty() && text.empty() && width == 0,
+			"an empty text gave something");
+
+		// All the lines of a paragraph: each fits, and together they are the text
+		const std::string paragraph = "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG";
+		text = paragraph;
+		std::string joined;
+		int lines = 0;
+		while (!text.empty() && lines < 100) {
+			const std::string line = font.TruncateString(text, 44, &width);
+			CHECK(!line.empty() && width < 44 && width == font.TextWidth(line),
+				"a line of the paragraph is empty or too wide");
+			joined += (joined.empty() ? "" : " ") + line;
+			lines++;
+		}
+		CHECK(joined == paragraph && lines == 5, "the lines don't make up the paragraph");
+	}
+
 	// The loader that has the built-in font only
 	BuiltinFontLoader loader;
 	std::unique_ptr<Font> loaded = loader.Load("builtin");

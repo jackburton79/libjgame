@@ -123,6 +123,14 @@ main()
 
 	bitmap->Release();
 
+	// Cutting a text into lines works with the font's own sizes: "AA" is 10 wide
+	// and a space takes 3
+	std::string text = "AA AA";
+	int width = 0;
+	CHECK(font.TruncateString(text, 20, &width) == "AA" && text == "AA" && width == 10,
+		"the text wasn't cut where this font's sizes say");
+	CHECK(font.TruncateString(text, 20, &width) == "AA" && text.empty(), "the rest wasn't taken");
+
 	// Glyphs with offsets, colours of their own and characters that are missing
 	ArtFont art;
 	CHECK(art.TextWidth("xgx") == 9, "the glyphs' widths don't add up");

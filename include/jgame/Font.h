@@ -56,6 +56,15 @@ public:
 	void DrawCentered(Bitmap* target, int centreX, int y, const std::string& text,
 		uint32 color, int scale = 1) const;
 
+	// Takes the first line off `string`: the longest start of it, up to a space,
+	// that is narrower than `maxWidth`, and returns it; `string` is left with the
+	// rest (the space the line ended at is dropped). A first word that is wider
+	// than `maxWidth` is cut where it fits, but a line is never empty unless
+	// the text was: calling this until `string` is empty always ends. If
+	// `truncatedWidth` isn't null it gets the width of the line.
+	std::string TruncateString(std::string& string, int maxWidth,
+		int* truncatedWidth = nullptr, int scale = 1) const;
+
 	// The built-in font
 	static const Font& Builtin();
 };
