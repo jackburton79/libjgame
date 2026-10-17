@@ -14,7 +14,6 @@ SUBDIRS := \
 	audio \
 	graphics \
 	input \
-	shell \
 	streams \
 	support \
 	timers
