@@ -16,6 +16,7 @@
 #include <jgame/FileStream.h>
 #include <jgame/Font.h>
 #include <jgame/FontLoader.h>
+#include <jgame/Gamepad.h>
 #include <jgame/GraphicsDefs.h>
 #include <jgame/GraphicsEngine.h>
 #include <jgame/Keyboard.h>

@@ -45,8 +45,11 @@ public:
 
 private:
 	friend class Events;
+	friend class Gamepad;
 	static void _BeginFrame();
 	static void _KeyDown(int scancode);
+	// A key a game controller stands for went down (see Gamepad.h)
+	static void _VirtualPress(Key key);
 
 	static bool sPressed[KEY_COUNT];
 };

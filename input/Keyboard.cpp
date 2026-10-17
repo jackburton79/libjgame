@@ -4,6 +4,8 @@
 
 #include <jgame/Keyboard.h>
 
+#include <jgame/Gamepad.h>
+
 #include <SDL.h>
 
 namespace jgame {
@@ -102,6 +104,8 @@ Keyboard::IsShiftPressed()
 bool
 Keyboard::IsKeyDown(Key key)
 {
+	if (Gamepad::_IsKeyDown(key))
+		return true;
 	const SDL_Scancode scancode = scancode_for(key);
 	if (scancode == SDL_SCANCODE_UNKNOWN)
 		return false;
@@ -150,6 +154,14 @@ Keyboard::_KeyDown(int scancode)
 		if (scancode_for((Key)i) == scancode)
 			sPressed[i] = true;
 	}
+}
+
+/* static */
+void
+Keyboard::_VirtualPress(Key key)
+{
+	if (key > KEY_NONE && key < KEY_COUNT)
+		sPressed[key] = true;
 }
 
 } // namespace jgame
