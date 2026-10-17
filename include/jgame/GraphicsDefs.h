@@ -7,9 +7,11 @@
 
 #pragma once
 
-#include "SupportDefs.h"
+#include <jgame/SupportDefs.h>
 
 struct SDL_Rect;
+
+namespace jgame {
 
 namespace GFX {
 
@@ -129,3 +131,5 @@ void SDLRectToGFXRect(const SDL_Rect* source, rect* dest);
 extern const GFX::point kOrigin;
 
 };
+
+} // namespace jgame

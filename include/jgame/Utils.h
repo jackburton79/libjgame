@@ -3,7 +3,9 @@
 #include <cstdio>
 #include <string>
 
-#include "SupportDefs.h"
+#include <jgame/SupportDefs.h>
+
+namespace jgame {
 
 // Trim in place
 char* trim(char* string);
@@ -26,3 +28,5 @@ void set_bit(uint32& value, int bitPos);
 void clear_bit(uint32& value, int bitPos);
 
 void assert_size(size_t size, size_t controlValue);
+
+} // namespace jgame

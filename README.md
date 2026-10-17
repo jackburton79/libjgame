@@ -7,13 +7,24 @@ A small C++17 library of building blocks for 2D games, built on top of
 projects: windowing and software drawing, input, sound, timers and a handful of
 support classes.
 
-It is a static library (`libjgame.a`) with no separate public include
-directory: each module is a folder of headers and sources, and the headers are
-meant to be included directly.
+It is a static library (`libjgame.a`). All the public headers are in
+`include/jgame/` (one flat directory, no per-module subdirectories) and
+everything is in the `jgame` namespace (`jgame::Bitmap`, `jgame::Timer`,
+`jgame::GFX::Color`...).
+
+```cpp
+#include <jgame/jgame.h>      // everything...
+#include <jgame/Bitmap.h>     // ...or just what you need
+
+using namespace jgame;
+```
 
 ## Modules
 
-| Directory   | What it provides |
+The sources are grouped in a directory per module; the headers named here are in
+`include/jgame/`.
+
+| Sources     | What it provides |
 |-------------|------------------|
 | `graphics/` | `GraphicsEngine` (window, renderer, video modes, screen scaling, fade, screenshots), `Bitmap` (software surface with pixel/line/rect/polygon drawing, dithered fills, colour key, alpha, palettes, masked and scaled blits), `Polygon`, and `Font`, a tiny built-in 3x5 pixel font that needs no font files. |
 | `audio/`    | `SoundEngine`, one audio device that mixes a music stream, up to 8 overlapping one-shot samples and a raw ring buffer, with volume and fades; `AudioStream`, the interface for streamed music; `Synth`, a small synthesiser that turns a text "recipe" into sound effects, with no audio files and no audio device required. |
@@ -65,45 +76,60 @@ screen or sound card is needed.
 
 ## Using the library in your project
 
-Add the library's module directories to the include path, then link against
-`libjgame.a`, SDL2 and zlib:
+### Installed (recommended)
 
 ```sh
-g++ -std=c++17 \
-    -I/path/to/libjgame \
-    -I/path/to/libjgame/audio -I/path/to/libjgame/graphics \
-    -I/path/to/libjgame/input -I/path/to/libjgame/streams \
-    -I/path/to/libjgame/support -I/path/to/libjgame/timers \
-    $(sdl2-config --cflags) \
+make
+sudo make install            # PREFIX=/usr/local by default; use PREFIX=... to change it
+```
+
+This installs `libjgame.a`, the headers (in `$PREFIX/include/jgame`) and a
+`jgame.pc` file for pkg-config, which also brings in SDL2:
+
+```sh
+g++ -std=c++17 mygame.cpp $(pkg-config --cflags --libs jgame) -o mygame
+```
+
+If the prefix is not one pkg-config looks into, add `$PREFIX/lib/pkgconfig` to
+`PKG_CONFIG_PATH`. `make uninstall` removes everything.
+
+### Without installing
+
+Point the include path at `include` and link the library, SDL2 and zlib:
+
+```sh
+g++ -std=c++17 -I/path/to/libjgame/include $(sdl2-config --cflags) \
     mygame.cpp -o mygame \
     -L/path/to/libjgame/lib -ljgame $(sdl2-config --libs) -lz
 ```
 
-A minimal program:
+### A minimal program
+
+[`examples/minimal.cpp`](examples/minimal.cpp) opens a window and shows some text:
 
 ```cpp
-#include "Events.h"
-#include "GraphicsEngine.h"
-#include "Keyboard.h"
-#include "Timer.h"
+#include <jgame/jgame.h>
+
+using namespace jgame;
 
 int main()
 {
-	GraphicsEngine::Initialize();
-	Timer::Initialize();
+	if (!GraphicsEngine::Initialize() || !Timer::Initialize())
+		return 1;
 
 	GraphicsEngine* gfx = GraphicsEngine::Get();
 	gfx->SetVideoMode(320, 200, 32, GraphicsEngine::VIDEOMODE_PIXELATED);
 	gfx->SetWindowSize(960, 600);
 
+	Bitmap* screen = gfx->ScreenBitmap();
 	while (!Events::QuitRequested()) {
 		Events::Pump();
 		if (Keyboard::WasKeyPressed(Keyboard::KEY_ESCAPE))
 			Events::RequestQuit();
 
-		Bitmap* screen = gfx->ScreenBitmap();
-		screen->Clear(0);
-		// ... draw the frame, e.g. with Font::DrawCentered(...)
+		screen->Clear(screen->MapRGBColor(20, 20, 60));
+		Font::DrawCentered(screen, 160, 90, "HELLO JGAME",
+			screen->MapRGBColor(255, 255, 255), 4);
 		gfx->Update();
 		Timer::Wait(16);
 	}

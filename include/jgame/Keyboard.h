@@ -4,7 +4,9 @@
 
 #pragma once
 
-#include "SupportDefs.h"
+#include <jgame/SupportDefs.h>
+
+namespace jgame {
 
 // Live keyboard state, and whether typed text is delivered
 class Keyboard {
@@ -48,3 +50,5 @@ private:
 
 	static bool sPressed[KEY_COUNT];
 };
+
+} // namespace jgame

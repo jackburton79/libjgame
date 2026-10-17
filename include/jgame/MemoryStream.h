@@ -1,7 +1,9 @@
 #pragma once
 
-#include "Stream.h"
-#include "SupportDefs.h"
+#include <jgame/Stream.h>
+#include <jgame/SupportDefs.h>
+
+namespace jgame {
 
 class MemoryStream : public Stream {
 public:
@@ -32,3 +34,5 @@ private:
 	MemoryStream(const MemoryStream& other) = delete;
 	MemoryStream& operator=(const MemoryStream& other) = delete;
 };
+
+} // namespace jgame

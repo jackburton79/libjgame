@@ -7,9 +7,11 @@
  */
 #pragma once
 
-#include "Bitmap.h"
+#include <jgame/Bitmap.h>
 
 #include <string>
+
+namespace jgame {
 
 namespace Font {
 
@@ -25,3 +27,5 @@ void DrawCentered(Bitmap* target, int centreX, int y, const std::string& text,
 	uint32 color, int scale = 1);
 
 } // namespace Font
+
+} // namespace jgame

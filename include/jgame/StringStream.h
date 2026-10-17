@@ -7,9 +7,11 @@
 
 #pragma once
 
-#include "MemoryStream.h"
+#include <jgame/MemoryStream.h>
 
 #include <string>
+
+namespace jgame {
 
 class StringStream: public MemoryStream {
 public:
@@ -17,3 +19,5 @@ public:
 	StringStream(const std::string& string);
 	virtual ~StringStream();
 };
+
+} // namespace jgame

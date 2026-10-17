@@ -7,11 +7,13 @@
 
 #pragma once
 
-#include "Referenceable.h"
-#include "GraphicsDefs.h"
-#include "SupportDefs.h"
+#include <jgame/Referenceable.h>
+#include <jgame/GraphicsDefs.h>
+#include <jgame/SupportDefs.h>
 
 struct SDL_Surface;
+
+namespace jgame {
 
 class GraphicsEngine;
 class Polygon;
@@ -122,3 +124,5 @@ private:
 	uint8* fData;
 	bool fOwns;
 };
+
+} // namespace jgame

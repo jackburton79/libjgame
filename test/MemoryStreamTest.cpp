@@ -1,9 +1,11 @@
 // MemoryStream::Adopt(): the new stream takes over the data, and frees it only
 // if the old one would have.
-#include "MemoryStream.h"
+#include <jgame/MemoryStream.h>
 
 #include <cstdio>
 #include <cstdlib>
+
+using namespace jgame;
 
 static int sFailures = 0;
 

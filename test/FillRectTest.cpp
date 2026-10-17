@@ -1,10 +1,12 @@
 // FillRect used to truncate the colour to 8 bits, which only works on 8 bit surfaces.
-#include "Bitmap.h"
+#include <jgame/Bitmap.h>
 
 #include <SDL.h>
 
 #include <cstdio>
 #include <cstdlib>
+
+using namespace jgame;
 
 int
 main()

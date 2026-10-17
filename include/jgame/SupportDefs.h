@@ -5,8 +5,12 @@
  *      Author: stefano
  */
 
-#ifndef __SUPPORTDEFS_H
-#define __SUPPORTDEFS_H
+#pragma once
+
+#include <string>
+#include <vector>
+
+namespace jgame {
 
 typedef int status_t;
 typedef long long int64;
@@ -21,12 +25,9 @@ typedef char int8;
 typedef unsigned char uint8;
 typedef signed char sint8;
 
-#include <string>
-#include <vector>
-
 typedef std::vector<std::string> StringList;
 typedef std::vector<std::string>::iterator StringListIterator;
 
 extern void check_types_size();
 
-#endif /* __SUPPORTDEFS_H */
+} // namespace jgame

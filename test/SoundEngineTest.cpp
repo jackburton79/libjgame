@@ -1,14 +1,16 @@
 // SoundEngine must use a single audio device: some platforms (Haiku) crash or
 // refuse when a program opens several. The "dummy" SDL driver allows only one
 // device at a time, so this fails if the engine opens a second one.
-#include "AudioStream.h"
-#include "SoundEngine.h"
+#include <jgame/AudioStream.h>
+#include <jgame/SoundEngine.h>
 
 #include <SDL.h>
 
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
+
+using namespace jgame;
 
 static int sFailures = 0;
 

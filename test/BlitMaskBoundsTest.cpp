@@ -11,13 +11,15 @@
  * path still blits.
  */
 
-#include "Bitmap.h"
-#include "GraphicsDefs.h"
-#include "GraphicsEngine.h"
+#include <jgame/Bitmap.h>
+#include <jgame/GraphicsDefs.h>
+#include <jgame/GraphicsEngine.h>
 
 #include "SDL.h"
 
 #include <iostream>
+
+using namespace jgame;
 
 static int sFailures = 0;
 

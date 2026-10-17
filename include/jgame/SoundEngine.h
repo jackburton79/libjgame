@@ -7,10 +7,12 @@
 
 #pragma once
 
-#include "AudioStream.h"
-#include "SupportDefs.h"
+#include <jgame/AudioStream.h>
+#include <jgame/SupportDefs.h>
 
 #include <vector>
+
+namespace jgame {
 
 // One slot of SoundEngine's one-shot sound-effect pool - see PlaySample().
 // The sound is converted when it is queued, so `data` is always interleaved
@@ -149,3 +151,5 @@ private:
 
 	static void MixCallback(void* userData, uint8* stream, int len);
 };
+
+} // namespace jgame

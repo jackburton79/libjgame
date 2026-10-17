@@ -1,4 +1,4 @@
-#include "FileStream.h"
+#include <jgame/FileStream.h>
 
 #include <cassert>
 #include <cstdlib>
@@ -6,7 +6,12 @@
 #include <dirent.h>
 #include <filesystem>
 
-#include "Utils.h"
+#include <jgame/Utils.h>
+
+namespace jgame {
+
+static const int ACCESS_MODE_MASK = 0x03;
+static const int FLAGS_MASK = 0xFFF8;
 
 
 FileStream::FileStream(const char *filename, int mode)
@@ -59,7 +64,7 @@ FileStream::SetTo(const char *filename, int mode)
 	}
 	
 	if (openFlags & FileStream::IGNORE_CASE)
-		fFileHandle = ::fopen_case(filename, flags);
+		fFileHandle = fopen_case(filename, flags);
 	else
 		fFileHandle = ::fopen(filename, flags);
 
@@ -164,3 +169,5 @@ FileStream::WriteAtomic(const char *filename, const void *data, size_t size)
 	}
 	return true;
 }
+
+} // namespace jgame

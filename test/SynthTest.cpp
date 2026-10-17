@@ -1,10 +1,12 @@
 // The synthesiser: what a recipe renders to, and that wrong recipes are
 // refused with a message that says what is wrong.
-#include "Synth.h"
+#include <jgame/Synth.h>
 
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
+
+using namespace jgame;
 
 static int sFailures = 0;
 

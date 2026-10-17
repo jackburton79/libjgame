@@ -4,10 +4,9 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "Stream.h"
+#include <jgame/Stream.h>
 
-#define ACCESS_MODE_MASK	0x03
-#define FLAGS_MASK			0xFFF8
+namespace jgame {
 
 class FileStream : public Stream {
 public:
@@ -50,3 +49,5 @@ public:
 private:
 	FILE *fFileHandle;
 };
+
+} // namespace jgame

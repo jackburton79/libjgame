@@ -1,7 +1,9 @@
 #pragma once
 
-#include "Bitmap.h"
-#include "GraphicsDefs.h"
+#include <jgame/Bitmap.h>
+#include <jgame/GraphicsDefs.h>
+
+namespace jgame {
 
 class Polygon {
 public:
@@ -36,3 +38,5 @@ private:
 	GFX::rect fFrame;
 	uint8 fFlags;
 };
+
+} // namespace jgame

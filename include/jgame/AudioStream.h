@@ -7,9 +7,11 @@
 
 #pragma once
 
-#include "SupportDefs.h"
+#include <jgame/SupportDefs.h>
 
 #include <cstddef>
+
+namespace jgame {
 
 class AudioStream {
 public:
@@ -23,3 +25,5 @@ public:
 	// Runs on the audio thread: it must not block for long or touch the game.
 	virtual size_t Read(uint8* buffer, size_t bytes) = 0;
 };
+
+} // namespace jgame

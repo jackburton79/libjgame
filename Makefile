@@ -6,10 +6,16 @@ RM := rm -rf
 
 LIBS := -lz $(shell sdl2-config --libs)
 GAMELIB := libjgame.a
+VERSION := 4.0
+
+# Where `make install` puts the library, the headers (in $(PREFIX)/include/jgame)
+# and jgame.pc
+PREFIX ?= /usr/local
 
 OUTDIR := lib
 OBJDIR := obj
 
+# The directories with the sources (the public headers are all in include/jgame)
 SUBDIRS := \
 	audio \
 	graphics \
@@ -22,7 +28,7 @@ SRCS := $(wildcard *.cpp $(foreach d,$(SUBDIRS),$(d)/*.cpp))
 OBJS := $(addprefix $(OBJDIR)/,$(SRCS:.cpp=.o))
 DEPS := $(OBJS:.o=.d)
 
-CPPFLAGS := -I. $(addprefix -I,$(SUBDIRS))
+CPPFLAGS := -Iinclude
 # (C++17: the code uses structured bindings, which a compiler whose default is older refuses)
 CXXFLAGS := -std=c++17 -Wall -Werror $(shell sdl2-config --cflags)
 
@@ -36,7 +42,7 @@ endif
 
 -include $(DEPS)
 
-.PHONY: all clean echoes tests test
+.PHONY: all clean echoes tests test install uninstall
 
 all: $(OUTDIR)/$(GAMELIB)
 
@@ -68,6 +74,18 @@ $(TESTBINDIR)/%: $(TESTDIR)/%.cpp $(OUTDIR)/$(GAMELIB)
 	mkdir -p $(@D)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< \
 		-L$(OUTDIR) -ljgame $(LIBS)
+
+install: all
+	install -d $(DESTDIR)$(PREFIX)/include/jgame $(DESTDIR)$(PREFIX)/lib/pkgconfig
+	install -m 644 include/jgame/*.h $(DESTDIR)$(PREFIX)/include/jgame
+	install -m 644 $(OUTDIR)/$(GAMELIB) $(DESTDIR)$(PREFIX)/lib
+	sed -e 's|@PREFIX@|$(PREFIX)|' -e 's|@VERSION@|$(VERSION)|' jgame.pc.in \
+		> $(DESTDIR)$(PREFIX)/lib/pkgconfig/jgame.pc
+
+uninstall:
+	$(RM) $(DESTDIR)$(PREFIX)/include/jgame \
+		$(DESTDIR)$(PREFIX)/lib/$(GAMELIB) \
+		$(DESTDIR)$(PREFIX)/lib/pkgconfig/jgame.pc
 
 clean:
 	$(RM) $(OUTDIR) $(OBJDIR)

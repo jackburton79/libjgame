@@ -1,13 +1,15 @@
 // Timer's one-shot and periodic callbacks: every one-shot runs once, even with
 // no delay at all, removing a timer that isn't there is harmless, and nothing
 // fires after TearDown().
-#include "Events.h"
-#include "Timer.h"
+#include <jgame/Events.h>
+#include <jgame/Timer.h>
 
 #include <SDL.h>
 
 #include <cstdio>
 #include <cstdlib>
+
+using namespace jgame;
 
 static int sFailures = 0;
 static int sOneShotCalls = 0;

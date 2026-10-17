@@ -1,7 +1,9 @@
-#include "Font.h"
+#include <jgame/Font.h>
 
 #include <cctype>
 #include <cstring>
+
+namespace jgame {
 
 namespace {
 
@@ -115,3 +117,5 @@ DrawCentered(Bitmap* target, int centreX, int y, const std::string& text,
 }
 
 } // namespace Font
+
+} // namespace jgame

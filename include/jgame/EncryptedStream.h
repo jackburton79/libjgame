@@ -7,7 +7,9 @@
 
 #pragma once
 
-#include "Stream.h"
+#include <jgame/Stream.h>
+
+namespace jgame {
 
 class EncryptedStream : public Stream {
 public:
@@ -26,3 +28,5 @@ private:
 	const uint8* fKey;
 	size_t fKeySize;
 };
+
+} // namespace jgame

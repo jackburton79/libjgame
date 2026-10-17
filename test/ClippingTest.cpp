@@ -1,11 +1,13 @@
 // GraphicsEngine::SetClipping(): drawing on the screen stays inside the rect
 // until the clipping is taken away again with a null rect.
-#include "GraphicsEngine.h"
+#include <jgame/GraphicsEngine.h>
 
 #include <SDL.h>
 
 #include <cstdio>
 #include <cstdlib>
+
+using namespace jgame;
 
 static int sFailures = 0;
 

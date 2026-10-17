@@ -5,11 +5,13 @@
  *      Author: Stefano Ceccherini
  */
 
-#include "ZLibDecompressor.h"
+#include <jgame/ZLibDecompressor.h>
 
 #include <iostream>
 
 #include <zlib.h>
+
+namespace jgame {
 
 
 ZLibDecompressor::ZLibDecompressor()
@@ -43,3 +45,5 @@ ZLibDecompressor::DecompressBuffer(const void* inputBuffer,
 
 	return 0;
 }
+
+} // namespace jgame

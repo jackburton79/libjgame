@@ -8,6 +8,8 @@
 
 #include <cstddef>
 
+namespace jgame {
+
 class Referenceable;
 template <typename T = Referenceable>
 class Reference {
@@ -97,3 +99,5 @@ public:
 private:
 	T* fTarget;
 };
+
+} // namespace jgame

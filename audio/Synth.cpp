@@ -2,14 +2,16 @@
  * Synth.cpp
  */
 
-#include "Synth.h"
+#include <jgame/Synth.h>
 
-#include "Rng.h"
+#include <jgame/Rng.h>
 
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <sstream>
+
+namespace jgame {
 
 namespace {
 
@@ -170,3 +172,5 @@ Render(const std::string& recipe, Samples& out, std::string& error, uint32 sampl
 }
 
 } // namespace Synth
+
+} // namespace jgame

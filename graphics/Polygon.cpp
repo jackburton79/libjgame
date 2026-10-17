@@ -1,10 +1,12 @@
-#include "Bitmap.h"
-#include "Polygon.h"
+#include <jgame/Bitmap.h>
+#include <jgame/Polygon.h>
 
 #include <assert.h>
 #include <cstdlib>
 #include <cstring>
 #include <stdexcept>
+
+namespace jgame {
 
 
 Polygon::Polygon()
@@ -182,3 +184,5 @@ Polygon::Print() const
 	printf("\t%d - %d\n", fFrame.y, fFrame.y + fFrame.h);
 	printf("Flags: 0x%x\n", fFlags);
 }
+
+} // namespace jgame

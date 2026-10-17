@@ -1,4 +1,4 @@
-#include "Utils.h"
+#include <jgame/Utils.h>
 
 
 #include <algorithm> 
@@ -11,7 +11,9 @@
 #include <dirent.h>
 #include <string>
 
-#include "Path.h"
+#include <jgame/Path.h>
+
+namespace jgame {
 
 
 // Source - https://stackoverflow.com/a/217605
@@ -194,3 +196,5 @@ assert_size(size_t size, size_t controlValue)
 		assert(size == controlValue);
 	}
 }
+
+} // namespace jgame
