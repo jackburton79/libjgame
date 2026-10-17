@@ -26,7 +26,7 @@ The sources are grouped in a directory per module; the headers named here are in
 
 | Sources     | What it provides |
 |-------------|------------------|
-| `graphics/` | `GraphicsEngine` (window, renderer, video modes, screen scaling, fade, screenshots), `Bitmap` (software surface with pixel/line/rect/polygon drawing, dithered fills, colour key, alpha, palettes, masked and scaled blits), `Polygon`, and `Font`, a tiny built-in 3x5 pixel font that needs no font files. |
+| `graphics/` | `GraphicsEngine` (window, renderer, video modes, screen scaling, fade, screenshots), `Bitmap` (software surface with pixel/line/rect/polygon drawing, dithered fills, colour key, alpha, palettes, masked and scaled blits), `Polygon`, and text: `Font`, the interface a font has to implement (so a game can use fonts of its own), `FontLoader`, where fonts come from, and a tiny built-in 3x5 pixel font that needs no font files (`Font::Builtin()`). |
 | `audio/`    | `SoundEngine`, one audio device that mixes a music stream, up to 8 overlapping one-shot samples and a raw ring buffer, with volume and fades; `AudioStream`, the interface for streamed music; `Synth`, a small synthesiser that turns a text "recipe" into sound effects, with no audio files and no audio device required. |
 | `input/`    | `Events`, the per-frame event pump and quit handling; `Keyboard`, polled key state independent from SDL. |
 | `timers/`   | `Timer`: named timers, one-shot and periodic callbacks, tick counting and frame-rate sync helpers. |
@@ -128,7 +128,7 @@ int main()
 			Events::RequestQuit();
 
 		screen->Clear(screen->MapRGBColor(20, 20, 60));
-		Font::DrawCentered(screen, 160, 90, "HELLO JGAME",
+		Font::Builtin().DrawCentered(screen, 160, 90, "HELLO JGAME",
 			screen->MapRGBColor(255, 255, 255), 4);
 		gfx->Update();
 		Timer::Wait(16);

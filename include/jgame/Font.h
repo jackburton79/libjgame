@@ -1,8 +1,17 @@
 /*
  * Font.h
  *
- * A tiny built-in 3x5 pixel font (upper case, digits, a little punctuation):
- * text without any font file. Lower case is drawn as upper case, and
+ * What the library needs from a font to put text on a Bitmap, as an interface
+ * (Font), so a game can draw with a font of its own: derive from it, say how
+ * wide and tall the characters are and how to draw one, and the text
+ * methods (TextWidth(), DrawText(), DrawCentered()) work with it. Where fonts
+ * come from is up to a FontLoader (see FontLoader.h).
+ *
+ * Text is a sequence of bytes, a character each. A font that wants more (UTF-8,
+ * kerning...) overrides TextWidth() and DrawText() too.
+ *
+ * BuiltinFont is a tiny 3x5 pixel font (upper case, digits, a little
+ * punctuation) that needs no font file: lower case is drawn as upper case, and
  * characters it doesn't have as blanks.
  */
 #pragma once
@@ -13,19 +22,65 @@
 
 namespace jgame {
 
-namespace Font {
+class Font {
+public:
+	virtual ~Font();
 
-constexpr int kGlyphW = 3;
-constexpr int kGlyphH = 5;
-constexpr int kAdvance = 4;
+	// All the sizes are in the font's own pixels: the text methods multiply
+	// them by `scale`, and so does DrawGlyph().
 
-int TextWidth(const std::string& text, int scale = 1);
-void DrawText(Bitmap* target, int x, int y, const std::string& text, uint32 color,
-	int scale = 1);
-// Centred on `centreX`, with a dark drop shadow for legibility
-void DrawCentered(Bitmap* target, int centreX, int y, const std::string& text,
-	uint32 color, int scale = 1);
+	// How tall a line of text is
+	virtual int Height() const = 0;
+	// How far the pen moves to the right after `ch`: its width and the space
+	// that follows. 0 for a character the font doesn't have, which is skipped.
+	virtual int Advance(uint8 ch) const = 0;
+	// How wide `ch` is, without the space after it (0 if the font hasn't got it)
+	virtual int GlyphWidth(uint8 ch) const = 0;
+	// Draws `ch` in the line whose top left corner is (x, y): the font puts the
+	// glyph where it belongs inside the line (a letter with a tail goes lower
+	// than one without, and a font whose glyphs have offsets of their own applies
+	// them), each pixel of the font a square of `scale` by `scale`. `color` is in
+	// the target's pixel format (what Bitmap::MapRGBColor() gives); a font with
+	// colours of its own, made from artwork, is free to ignore it. Draws nothing
+	// for a character the font doesn't have.
+	virtual void DrawGlyph(Bitmap* target, int x, int y, uint8 ch, uint32 color,
+		int scale = 1) const = 0;
 
-} // namespace Font
+	// The width of `text`: the advance of every character but the last, and
+	// the width of the last
+	virtual int TextWidth(const std::string& text, int scale = 1) const;
+	// The characters one after the other, the pen moving by their advance
+	virtual void DrawText(Bitmap* target, int x, int y, const std::string& text,
+		uint32 color, int scale = 1) const;
+	// Centred on `centreX`, with a dark drop shadow for legibility
+	void DrawCentered(Bitmap* target, int centreX, int y, const std::string& text,
+		uint32 color, int scale = 1) const;
+
+	// Takes the first line off `string`: the longest start of it, up to a space,
+	// that is narrower than `maxWidth`, and returns it; `string` is left with the
+	// rest (the space the line ended at is dropped). A first word that is wider
+	// than `maxWidth` is cut where it fits, but a line is never empty unless
+	// the text was: calling this until `string` is empty always ends. If
+	// `truncatedWidth` isn't null it gets the width of the line.
+	std::string TruncateString(std::string& string, int maxWidth,
+		int* truncatedWidth = nullptr, int scale = 1) const;
+
+	// The built-in font
+	static const Font& Builtin();
+};
+
+
+class BuiltinFont final : public Font {
+public:
+	static constexpr int kGlyphW = 3;
+	static constexpr int kGlyphH = 5;
+	static constexpr int kAdvance = 4;
+
+	virtual int Height() const override;
+	virtual int Advance(uint8 ch) const override;
+	virtual int GlyphWidth(uint8 ch) const override;
+	virtual void DrawGlyph(Bitmap* target, int x, int y, uint8 ch, uint32 color,
+		int scale = 1) const override;
+};
 
 } // namespace jgame

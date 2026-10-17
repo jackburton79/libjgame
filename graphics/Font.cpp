@@ -77,45 +77,130 @@ Find(char c)
 } // namespace
 
 
-namespace Font {
+Font::~Font()
+{
+}
+
 
 int
-TextWidth(const std::string& text, int scale)
+Font::TextWidth(const std::string& text, int scale) const
 {
 	if (text.empty())
 		return 0;
-	return ((int)text.size() * kAdvance - 1) * scale;
+	int width = 0;
+	for (size_t i = 0; i + 1 < text.size(); i++)
+		width += Advance((uint8)text[i]);
+	width += GlyphWidth((uint8)text[text.size() - 1]);
+	return width * scale;
 }
 
 
 void
-DrawText(Bitmap* target, int x, int y, const std::string& text, uint32 color, int scale)
+Font::DrawText(Bitmap* target, int x, int y, const std::string& text, uint32 color,
+	int scale) const
 {
 	for (char c : text) {
-		const Glyph* g = Find(c);
-		if (g != nullptr) {
-			for (int row = 0; row < kGlyphH; row++) {
-				for (int col = 0; col < kGlyphW; col++) {
-					if (g->rows[row][col] == '1')
-						target->FillRect(GFX::rect(x + col * scale, y + row * scale,
-							scale, scale), color);
-				}
-			}
-		}
-		x += kAdvance * scale;
+		DrawGlyph(target, x, y, (uint8)c, color, scale);
+		x += Advance((uint8)c) * scale;
 	}
 }
 
 
 void
-DrawCentered(Bitmap* target, int centreX, int y, const std::string& text,
-	uint32 color, int scale)
+Font::DrawCentered(Bitmap* target, int centreX, int y, const std::string& text,
+	uint32 color, int scale) const
 {
 	int x = centreX - TextWidth(text, scale) / 2;
 	DrawText(target, x + scale, y + scale, text, target->MapRGBColor(0, 0, 0), scale);
 	DrawText(target, x, y, text, color, scale);
 }
 
-} // namespace Font
+
+std::string
+Font::TruncateString(std::string& string, int maxWidth, int* truncatedWidth,
+	int scale) const
+{
+	if (string.empty()) {
+		if (truncatedWidth != nullptr)
+			*truncatedWidth = 0;
+		return string;
+	}
+
+	// Try the whole string, then up to each space going backwards
+	size_t breakPos = string.length();
+	for (;;) {
+		std::string line = string.substr(0, breakPos);
+		const int width = TextWidth(line, scale);
+		if (width < maxWidth) {
+			if (truncatedWidth != nullptr)
+				*truncatedWidth = width;
+			string = breakPos == string.length() ? "" : string.substr(breakPos + 1);
+			return line;
+		}
+
+		const size_t space = breakPos > 0 ? string.rfind(' ', breakPos - 1)
+			: std::string::npos;
+		if (space == std::string::npos) {
+			// No space left to break at: the first word alone is too wide, so
+			// cut it where it fits (one character at least, to make progress)
+			size_t length = breakPos > 1 ? breakPos - 1 : 1;
+			while (length > 1 && TextWidth(string.substr(0, length), scale) >= maxWidth)
+				length--;
+			line = string.substr(0, length);
+			if (truncatedWidth != nullptr)
+				*truncatedWidth = TextWidth(line, scale);
+			string = string.substr(length);
+			return line;
+		}
+		breakPos = space;
+	}
+}
+
+
+/* static */
+const Font&
+Font::Builtin()
+{
+	static const BuiltinFont font;
+	return font;
+}
+
+
+int
+BuiltinFont::Height() const
+{
+	return kGlyphH;
+}
+
+
+int
+BuiltinFont::Advance(uint8) const
+{
+	return kAdvance;
+}
+
+
+int
+BuiltinFont::GlyphWidth(uint8) const
+{
+	return kGlyphW;
+}
+
+
+void
+BuiltinFont::DrawGlyph(Bitmap* target, int x, int y, uint8 ch, uint32 color,
+	int scale) const
+{
+	const Glyph* g = Find((char)ch);
+	if (g == nullptr)
+		return;
+	for (int row = 0; row < kGlyphH; row++) {
+		for (int col = 0; col < kGlyphW; col++) {
+			if (g->rows[row][col] == '1')
+				target->FillRect(GFX::rect(x + col * scale, y + row * scale,
+					scale, scale), color);
+		}
+	}
+}
 
 } // namespace jgame
