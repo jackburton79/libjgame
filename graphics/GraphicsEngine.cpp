@@ -108,8 +108,8 @@ GraphicsEngine::SetClipping(const GFX::rect* rect)
 		SDL_Rect sdlRect;
 		GFXRectToSDLRect(rect, &sdlRect);
 		SDL_SetClipRect(fScreen->Surface(), &sdlRect);
-	}
-	SDL_SetClipRect(fScreen->Surface(), nullptr);
+	} else
+		SDL_SetClipRect(fScreen->Surface(), nullptr);
 }
 
 

@@ -29,5 +29,6 @@ private:
 	off_t fPosition;
 	bool fOwnsBuffer;
 
-	MemoryStream(const MemoryStream& other);
+	MemoryStream(const MemoryStream& other) = delete;
+	MemoryStream& operator=(const MemoryStream& other) = delete;
 };
