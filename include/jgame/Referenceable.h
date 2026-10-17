@@ -5,9 +5,11 @@
  *      Author: stefano
  */
 
-#include "SupportDefs.h"
-
 #pragma once
+
+#include <jgame/SupportDefs.h>
+
+namespace jgame {
 
 class Referenceable {
 public:
@@ -45,3 +47,5 @@ private:
 
 
 extern void ReleaseAndNil(Referenceable*& );
+
+} // namespace jgame

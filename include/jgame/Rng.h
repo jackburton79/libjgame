@@ -9,6 +9,8 @@
 
 #include <cstdint>
 
+namespace jgame {
+
 class Rng {
 public:
 	explicit Rng(uint64_t seed = 1) : fState(seed) { Next(); }
@@ -36,3 +38,5 @@ public:
 private:
 	uint64_t fState;
 };
+
+} // namespace jgame

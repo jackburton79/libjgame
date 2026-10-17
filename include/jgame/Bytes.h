@@ -11,6 +11,8 @@
 #include <cstdint>
 #include <vector>
 
+namespace jgame {
+
 namespace Bytes {
 
 inline uint32_t
@@ -41,3 +43,5 @@ Get(const uint8_t* data, int bytes)
 }
 
 } // namespace Bytes
+
+} // namespace jgame

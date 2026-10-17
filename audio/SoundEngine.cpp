@@ -5,14 +5,16 @@
  *      Author: JackBurton
  */
 
-#include "SoundEngine.h"
+#include <jgame/SoundEngine.h>
 
-#include "Log.h"
+#include <jgame/Log.h>
 
 #include "SDL.h"
 
 #include <algorithm>
 #include <iostream>
+
+namespace jgame {
 
 static SoundEngine* sSoundEngine = nullptr;
 
@@ -651,3 +653,5 @@ SoundEngine::StreamPositionMs() const
 {
 	return (uint32)(fMusic.framesPlayed * 1000 / kMixSampleRate);
 }
+
+} // namespace jgame

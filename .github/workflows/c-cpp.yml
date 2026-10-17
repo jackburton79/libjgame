@@ -22,6 +22,12 @@ jobs:
       run: make tests
     - name: run-tests
       run: make test
+    - name: install-and-use
+      # What someone using the library does: install it, build against it with pkg-config
+      run: |
+        make install PREFIX=$PWD/_install
+        PKG_CONFIG_PATH=$PWD/_install/lib/pkgconfig g++ -std=c++17 -Wall -Werror examples/minimal.cpp \
+          $(PKG_CONFIG_PATH=$PWD/_install/lib/pkgconfig pkg-config --cflags --libs jgame) -o minimal
 
   # The same on a Mac (Apple's clang, SDL2 from Homebrew)
   macos:

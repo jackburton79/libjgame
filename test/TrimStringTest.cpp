@@ -2,7 +2,9 @@
 #include <iostream>
 #include <vector>
 
-#include "Utils.h"
+#include <jgame/Utils.h>
+
+using namespace jgame;
 
 static int sFailures = 0;
 

@@ -1,11 +1,12 @@
 #pragma once
 
-#include "Bitmap.h"
-#include "GraphicsDefs.h"
+#include <jgame/Bitmap.h>
+#include <jgame/GraphicsDefs.h>
 
-class Bitmap;
 struct SDL_Window;
 struct SDL_Renderer;
+
+namespace jgame {
 class GraphicsEngine {
 public:
 	struct RenderContext;
@@ -86,3 +87,5 @@ private:
 	GraphicsEngine();
 	~GraphicsEngine();
 };
+
+} // namespace jgame

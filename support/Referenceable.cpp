@@ -5,10 +5,12 @@
  *      Author: stefano
  */
 
-#include "Referenceable.h"
+#include <jgame/Referenceable.h>
 
 #include <assert.h>
 #include <iostream>
+
+namespace jgame {
 
 
 bool Referenceable::sDebug = false;
@@ -127,3 +129,5 @@ ReleaseAndNil(Referenceable*& ref)
 		ref = NULL;
 	}
 }
+
+} // namespace jgame

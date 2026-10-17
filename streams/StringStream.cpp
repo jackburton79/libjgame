@@ -5,9 +5,11 @@
  *      Author: stefano
  */
 
-#include "StringStream.h"
+#include <jgame/StringStream.h>
 
 #include <string.h>
+
+namespace jgame {
 
 StringStream::StringStream(const char* string)
 	:
@@ -30,3 +32,4 @@ StringStream::~StringStream()
 {
 }
 
+} // namespace jgame

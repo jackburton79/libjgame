@@ -1,9 +1,11 @@
 // The same seed must give the same sequence on every platform, and the
 // helpers must stay inside their ranges.
-#include "Rng.h"
+#include <jgame/Rng.h>
 
 #include <cstdio>
 #include <cstdlib>
+
+using namespace jgame;
 
 int
 main()

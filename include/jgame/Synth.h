@@ -19,10 +19,12 @@
 
 #pragma once
 
-#include "SupportDefs.h"
+#include <jgame/SupportDefs.h>
 
 #include <string>
 #include <vector>
+
+namespace jgame {
 
 namespace Synth {
 
@@ -52,3 +54,5 @@ bool Render(const std::string& recipe, Samples& out, std::string& error,
 	uint32 sampleRate = kDefaultSampleRate);
 
 } // namespace Synth
+
+} // namespace jgame

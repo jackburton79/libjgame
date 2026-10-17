@@ -7,7 +7,9 @@
 
 #pragma once
 
-#include "SupportDefs.h"
+#include <jgame/SupportDefs.h>
+
+namespace jgame {
 
 
 class ZLibDecompressor {
@@ -20,3 +22,5 @@ public:
 								void* outputBuffer,
 								size_t& outputSize);
 };
+
+} // namespace jgame

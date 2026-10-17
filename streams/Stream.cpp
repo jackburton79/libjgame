@@ -1,8 +1,10 @@
-#include "Stream.h"
+#include <jgame/Stream.h>
 
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
+
+namespace jgame {
 
 
 class SubStreamAdapter : public Stream {
@@ -291,3 +293,5 @@ Stream::DumpToFile(const char *fileName)
 		Seek(oldPos, SEEK_SET);
 	}
 }
+
+} // namespace jgame

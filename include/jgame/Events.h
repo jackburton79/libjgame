@@ -4,6 +4,8 @@
 
 #pragma once
 
+namespace jgame {
+
 // The event pump. Call Pump() once per frame: it refreshes the state
 // Keyboard::WasKeyPressed() reports, runs the callbacks of the timers
 // (see Timer::AddOneShotTimer() and AddPeriodicTimer()), and notes
@@ -15,3 +17,5 @@ public:
 	static bool QuitRequested();
 	static void RequestQuit();
 };
+
+} // namespace jgame

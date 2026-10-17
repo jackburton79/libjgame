@@ -1,10 +1,12 @@
 // FillRectDithered() paints the share of the pixels it is asked for, in a
 // pattern that lines up from one rect to the next, and never outside the
 // rect or the bitmap.
-#include "Bitmap.h"
+#include <jgame/Bitmap.h>
 
 #include <cstdio>
 #include <cstdlib>
+
+using namespace jgame;
 
 static int sFailures = 0;
 

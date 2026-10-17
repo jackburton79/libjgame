@@ -1,11 +1,13 @@
 // The window can be bigger than the screen the game draws on: the screen
 // keeps the video mode's size whatever the window's.
-#include "GraphicsEngine.h"
+#include <jgame/GraphicsEngine.h>
 
 #include <SDL.h>
 
 #include <cstdio>
 #include <cstdlib>
+
+using namespace jgame;
 
 static int sFailures = 0;
 

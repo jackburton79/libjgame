@@ -7,8 +7,9 @@
 
 #pragma once
 
-#define GREEN(x) std::string("\033[1;32m").append(x).append("\033[0m")
-#define RED(x) std::string("\033[1;31m").append(x).append("\033[0m")
+#include <string>
+
+namespace jgame {
 
 class Log {
 public:
@@ -16,4 +17,10 @@ public:
 	static const char* Normal;
 	static const char* Red;
 	static const char* Yellow;
+
+	// The text, in that colour (ANSI escape codes)
+	static std::string InGreen(const std::string& text);
+	static std::string InRed(const std::string& text);
 };
+
+} // namespace jgame

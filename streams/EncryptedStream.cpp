@@ -5,9 +5,11 @@
  *      Author: stefano
  */
 
-#include "EncryptedStream.h"
+#include <jgame/EncryptedStream.h>
 
 #include <iostream>
+
+namespace jgame {
 
 EncryptedStream::EncryptedStream(Stream* stream, const uint8* key, size_t keyLength)
 	:
@@ -68,3 +70,5 @@ EncryptedStream::Size() const
 {
 	return fEncryptedStream->Size() - 2;
 }
+
+} // namespace jgame

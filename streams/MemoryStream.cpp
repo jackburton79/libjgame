@@ -1,7 +1,9 @@
-#include "MemoryStream.h"
+#include <jgame/MemoryStream.h>
 
 
 #include <string.h>
+
+namespace jgame {
 
 MemoryStream::MemoryStream(const uint8 *data, size_t size, bool owns)
 	:
@@ -148,3 +150,5 @@ MemoryStream::Adopt()
 
 	return newStream;
 }
+
+} // namespace jgame

@@ -5,14 +5,16 @@
  *      Author: stefano
  */
 
-#include "GraphicsDefs.h"
+#include <jgame/GraphicsDefs.h>
 
-#include "Bitmap.h"
+#include <jgame/Bitmap.h>
 
 #include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <SDL.h>
+
+namespace jgame {
 
 namespace GFX {
 
@@ -408,3 +410,5 @@ DestroyGlobalPalettes()
 
 
 }
+
+} // namespace jgame

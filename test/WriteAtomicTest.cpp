@@ -1,6 +1,6 @@
 // WriteAtomic() writes the whole file or leaves the old one alone, and never
 // leaves its temporary file behind.
-#include "FileStream.h"
+#include <jgame/FileStream.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -9,6 +9,8 @@
 
 #include <sys/stat.h>
 #include <unistd.h>
+
+using namespace jgame;
 
 static int sFailures = 0;
 

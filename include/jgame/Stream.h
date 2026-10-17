@@ -3,7 +3,9 @@
 #include <cstdio>
 #include <stdexcept>
 
-#include <SupportDefs.h>
+#include <jgame/SupportDefs.h>
+
+namespace jgame {
 
 class Stream {
 public:
@@ -88,3 +90,5 @@ public:
 	void Dump();
 	void DumpToFile(const char *fileName);
 };
+
+} // namespace jgame

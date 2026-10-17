@@ -1,9 +1,11 @@
 // Making colours, and turning, blending and darkening them.
-#include "GraphicsDefs.h"
+#include <jgame/GraphicsDefs.h>
 
 #include <cstdio>
 #include <cstdlib>
 #include <type_traits>
+
+using namespace jgame;
 
 static int sFailures = 0;
 

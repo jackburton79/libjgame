@@ -2,12 +2,14 @@
  * Events.cpp
  */
 
-#include "Events.h"
+#include <jgame/Events.h>
 
-#include "Keyboard.h"
-#include "Timer.h"
+#include <jgame/Keyboard.h>
+#include <jgame/Timer.h>
 
 #include <SDL.h>
+
+namespace jgame {
 
 
 static bool sQuitRequested = false;
@@ -58,3 +60,5 @@ Events::RequestQuit()
 {
 	sQuitRequested = true;
 }
+
+} // namespace jgame

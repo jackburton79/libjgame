@@ -12,13 +12,15 @@
 	Path implementation.
 */
 
-#include "Path.h"
+#include <jgame/Path.h>
 
 #include <errno.h>
 #include <limits.h>
 #include <new>
 #include <stdlib.h>
 #include <string.h>
+
+namespace jgame {
 
 using namespace std;
 
@@ -494,3 +496,5 @@ Path::_MustNormalize(const char* path, status_t* _error)
 		return false;
 	}
 }
+
+} // namespace jgame

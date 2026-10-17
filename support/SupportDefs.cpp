@@ -1,5 +1,7 @@
-#include "SupportDefs.h"
-#include "Utils.h"
+#include <jgame/SupportDefs.h>
+#include <jgame/Utils.h>
+
+namespace jgame {
 
 void
 check_types_size()
@@ -15,3 +17,5 @@ check_types_size()
 	assert_size(sizeof(sint8), 1);
 	assert_size(sizeof(char), 1);
 }
+
+} // namespace jgame

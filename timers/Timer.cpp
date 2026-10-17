@@ -6,7 +6,7 @@
  */
 
 
-#include "Timer.h"
+#include <jgame/Timer.h>
 
 
 #include <iostream>
@@ -14,6 +14,8 @@
 #include <sys/time.h>
 
 #include <SDL.h>
+
+namespace jgame {
 
 
 Timer::timer_map Timer::sNamedTimers;
@@ -256,3 +258,5 @@ Timer::Functor::Parameter()
 {
 	return fParameter;
 }
+
+} // namespace jgame

@@ -2,9 +2,11 @@
  * Keyboard.cpp
  */
 
-#include "Keyboard.h"
+#include <jgame/Keyboard.h>
 
 #include <SDL.h>
+
+namespace jgame {
 
 
 bool Keyboard::sPressed[Keyboard::KEY_COUNT];
@@ -149,3 +151,5 @@ Keyboard::_KeyDown(int scancode)
 			sPressed[i] = true;
 	}
 }
+
+} // namespace jgame

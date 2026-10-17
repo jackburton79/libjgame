@@ -1,0 +1,10 @@
+prefix=@PREFIX@
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: jgame
+Description: A small C++17 library of building blocks for 2D games, on top of SDL2
+Version: @VERSION@
+Requires: sdl2
+Libs: -L${libdir} -ljgame -lz
+Cflags: -I${includedir}

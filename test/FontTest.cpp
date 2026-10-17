@@ -1,9 +1,11 @@
 // The built-in font: sizes, where the pixels land, scaling and the shadow.
-#include "Bitmap.h"
-#include "Font.h"
+#include <jgame/Bitmap.h>
+#include <jgame/Font.h>
 
 #include <cstdio>
 #include <cstdlib>
+
+using namespace jgame;
 
 static int sFailures = 0;
 

@@ -1,8 +1,10 @@
 // Mirror() used to swap bytes instead of pixels, which only works on 8 bit surfaces.
-#include "Bitmap.h"
+#include <jgame/Bitmap.h>
 
 #include <cstdio>
 #include <cstdlib>
+
+using namespace jgame;
 
 static int
 TestDepth(int depth)

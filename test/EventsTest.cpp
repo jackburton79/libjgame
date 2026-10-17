@@ -1,10 +1,12 @@
-#include "Events.h"
-#include "Keyboard.h"
+#include <jgame/Events.h>
+#include <jgame/Keyboard.h>
 
 #include <SDL.h>
 
 #include <cstdio>
 #include <cstdlib>
+
+using namespace jgame;
 
 static int sFailures = 0;
 static int sTimerCalls = 0;

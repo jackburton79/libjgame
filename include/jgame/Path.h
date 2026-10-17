@@ -2,10 +2,11 @@
  * Copyright 2002-2009, Haiku, Inc. All Rights Reserved.
  * Distributed under the terms of the MIT License.
  */
-#ifndef _PATH_H
-#define _PATH_H
+#pragma once
 
-#include "SupportDefs.h"
+#include <jgame/SupportDefs.h>
+
+namespace jgame {
 
 namespace Storage {
 
@@ -45,6 +46,6 @@ private:
 			status_t		fCStatus;
 };
 
-}; // namespace Storage
+} // namespace Storage
 
-#endif	// _PATH_H
+} // namespace jgame

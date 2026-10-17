@@ -5,11 +5,11 @@
  *      Author: stefano
  */
 
-#include "Bitmap.h"
-#include "GraphicsDefs.h"
-#include "GraphicsEngine.h"
-#include "Log.h"
-#include "Polygon.h"
+#include <jgame/Bitmap.h>
+#include <jgame/GraphicsDefs.h>
+#include <jgame/GraphicsEngine.h>
+#include <jgame/Log.h>
+#include <jgame/Polygon.h>
 
 #include <algorithm>
 #include <cmath>
@@ -17,6 +17,8 @@
 #include <vector>
 
 #include "SDL.h"
+
+namespace jgame {
 
 
 Bitmap::Bitmap(uint16 width, uint16 height, uint16 bitsPerPixel)
@@ -135,7 +137,7 @@ void
 Bitmap::SetAlpha(uint8 value, bool on)
 {
 	if (value == 255) {
-		std::cerr << RED("BUG! SetAlpha(255) fails. Use SetAlpha(254)!") << std::endl;
+		std::cerr << Log::InRed("BUG! SetAlpha(255) fails. Use SetAlpha(254)!") << std::endl;
 		value = 254;		
 	}
 
@@ -629,3 +631,5 @@ DataBitmap::~DataBitmap()
 	if (fOwns)
 		delete[] fData;
 }
+
+} // namespace jgame

@@ -1,10 +1,12 @@
 #include <iostream>
 
-#include "Bitmap.h"
-#include "GraphicsEngine.h"
-#include "Log.h"
+#include <jgame/Bitmap.h>
+#include <jgame/GraphicsEngine.h>
+#include <jgame/Log.h>
 
 #include <SDL.h>
+
+namespace jgame {
 
 struct GraphicsEngine::RenderContext {
 	RenderContext();
@@ -452,3 +454,5 @@ GraphicsEngine::SetFade(uint16 value)
 	if (value <= 255)
 		SDL_SetTextureColorMod(fRenderContext->SDLTexture, value, value, value);
 }
+
+} // namespace jgame

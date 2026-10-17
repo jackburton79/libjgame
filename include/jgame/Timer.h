@@ -7,10 +7,12 @@
 
 #pragma once
 
-#include "SupportDefs.h"
+#include <jgame/SupportDefs.h>
 
 #include <map>
 #include <string>
+
+namespace jgame {
 
 
 typedef void (*timer_function)(void* parameter);
@@ -55,3 +57,4 @@ private:
 	static timer_map sNamedTimers;
 };
 
+} // namespace jgame

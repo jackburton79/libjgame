@@ -1,9 +1,11 @@
 // Numbers go into a buffer low byte first, come back the same, and the
 // checksum notices a changed byte.
-#include "Bytes.h"
+#include <jgame/Bytes.h>
 
 #include <cstdio>
 #include <cstdlib>
+
+using namespace jgame;
 
 static int sFailures = 0;
 
