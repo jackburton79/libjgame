@@ -55,6 +55,14 @@ public:
 	// keeping its proportions. A game can then draw at a low resolution and
 	// show it bigger. Call it after SetVideoMode().
 	void SetWindowSize(uint16 width, uint16 height);
+	// Full screen on and off while the game runs (VIDEOMODE_FULLSCREEN is only
+	// read when the window is made). The window keeps its own size for when
+	// it comes back. Where the window is always full screen (Android) there is
+	// nothing to switch: CanToggleFullscreen() is false, IsFullscreen() is true
+	// and SetFullscreen() does nothing, so a game can leave the option out.
+	bool IsFullscreen() const;
+	void SetFullscreen(bool on);
+	bool CanToggleFullscreen() const;
 	// The SDL window and renderer the engine draws on (null before SetVideoMode())
 	SDL_Window* Window() const;
 	SDL_Renderer* Renderer() const;

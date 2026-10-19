@@ -3,6 +3,7 @@
 //
 //   g++ -std=c++17 examples/minimal.cpp $(pkg-config --cflags --libs jgame) -o minimal
 #include <jgame/jgame.h>
+#include <jgame/Main.h>
 
 using namespace jgame;
 
