@@ -354,6 +354,48 @@ GraphicsEngine::SetWindowSize(uint16 width, uint16 height)
 }
 
 
+bool
+GraphicsEngine::IsFullscreen() const
+{
+	SDL_Window* window = fRenderContext->SDLWindow;
+	if (window == nullptr)
+		return false;
+	return (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) != 0;
+}
+
+
+void
+GraphicsEngine::SetFullscreen(bool on)
+{
+	SDL_Window* window = fRenderContext->SDLWindow;
+	if (window == nullptr || !CanToggleFullscreen())
+		return;
+
+	if (SDL_SetWindowFullscreen(window, on ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0) {
+		std::cerr << "GraphicsEngine::SetFullscreen(" << on << "): "
+			<< SDL_GetError() << std::endl;
+		return;
+	}
+	// What SetVideoMode() was given is kept true, for SetWindowSize() and
+	// for the mode SaveCurrentMode() remembers
+	if (on)
+		fFlags |= VIDEOMODE_FULLSCREEN;
+	else
+		fFlags &= ~VIDEOMODE_FULLSCREEN;
+}
+
+
+bool
+GraphicsEngine::CanToggleFullscreen() const
+{
+#ifdef __ANDROID__
+	return false;
+#else
+	return true;
+#endif
+}
+
+
 SDL_Window*
 GraphicsEngine::Window() const
 {

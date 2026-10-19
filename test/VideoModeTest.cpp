@@ -70,6 +70,18 @@ main()
 		CHECK(sharp, "the scaled picture is not made of whole pixels");
 	}
 
+	// Full screen can be switched while running
+	CHECK(gfx->CanToggleFullscreen(), "full screen cannot be switched");
+	CHECK(!gfx->IsFullscreen(), "a windowed mode says it is full screen");
+	gfx->SetFullscreen(true);
+	CHECK(gfx->IsFullscreen(), "SetFullscreen(true) left the window as it was");
+	gfx->SetFullscreen(false);
+	CHECK(!gfx->IsFullscreen(), "SetFullscreen(false) left the window full screen");
+	gfx->SetWindowSize(960, 720);
+	if (window != nullptr)
+		SDL_GetWindowSize(window, &width, &height);
+	CHECK(width == 960 && height == 720, "the window lost its size after full screen");
+
 	// A new mode keeps working after the window was resized
 	gfx->SetVideoMode(640, 480, 32, GraphicsEngine::VIDEOMODE_WINDOWED);
 	CHECK(gfx->ScreenFrame().w == 640 && gfx->ScreenFrame().h == 480,
