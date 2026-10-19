@@ -19,6 +19,10 @@ everything is in the `jgame` namespace (`jgame::Bitmap`, `jgame::Timer`,
 using namespace jgame;
 ```
 
+The file that defines `main()` also includes `<jgame/Main.h>` (not part of
+`jgame.h`): on Windows and Android SDL renames `main()` to `SDL_main()`, and
+this header declares it the way SDL needs.
+
 ## Modules
 
 The sources are grouped in a directory per module; the headers named here are in
