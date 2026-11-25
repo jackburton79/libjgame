@@ -23,6 +23,7 @@
 #include <jgame/Log.h>
 #include <jgame/MemoryStream.h>
 #include <jgame/Path.h>
+#include <jgame/Platform.h>
 #include <jgame/Polygon.h>
 #include <jgame/Reference.h>
 #include <jgame/Referenceable.h>
@@ -33,5 +34,6 @@
 #include <jgame/SupportDefs.h>
 #include <jgame/Synth.h>
 #include <jgame/Timer.h>
+#include <jgame/TouchControls.h>
 #include <jgame/Utils.h>
 #include <jgame/ZLibDecompressor.h>
