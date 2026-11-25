@@ -22,7 +22,10 @@
  *
  * The positions and the sizes are in the screen's pixels, the ones of
  * GraphicsEngine::ScreenBitmap(): the fingers are brought there however the
- * screen is scaled and centred in the window.
+ * screen is scaled and centred in the window. A finger on a band at the side
+ * of the screen (where the window is wider than the screen) counts as on its
+ * edge. With no GraphicsEngine, the screen is the size UseDefaultLayout() was
+ * given, and fills the window.
  *
  * UseDefaultLayout() places the stick and buttons that stand for the keys a
  * game controller presses (see Gamepad.h): a game that works with a pad works
@@ -82,14 +85,6 @@ public:
 
 	// Draws the stick and the buttons, half see-through, when IsActive()
 	static void Draw(Bitmap* target);
-
-	// Where the point (x, y) of a window (0-1 across and down it, as fingers
-	// are told) is on a screen of `screenWidth` by `screenHeight` pixels shown
-	// in it as big as it fits, keeping its proportions, and centred (the way
-	// GraphicsEngine shows it), when the window is `windowWidth` by
-	// `windowHeight` pixels
-	static GFX::point WindowToScreen(float x, float y, int windowWidth, int windowHeight,
-		int screenWidth, int screenHeight);
 
 private:
 	friend class Events;

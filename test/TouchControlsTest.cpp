@@ -47,12 +47,6 @@ PushKey(SDL_Scancode scancode, bool down)
 	SDL_PushEvent(&event);
 }
 
-static bool
-CheckPoint(const GFX::point& point, int x, int y)
-{
-	return point.x == x && point.y == y;
-}
-
 int
 main()
 {
@@ -60,16 +54,6 @@ main()
 		std::printf("SDL_Init: %s\n", SDL_GetError());
 		return EXIT_FAILURE;
 	}
-
-	// From the window to the screen: a 320x200 screen in a 1280x800 window fills it
-	CHECK(CheckPoint(TouchControls::WindowToScreen(0.5f, 0.5f, 1280, 800, kW, kH), 160, 100), "the middle");
-	CHECK(CheckPoint(TouchControls::WindowToScreen(0, 0, 1280, 800, kW, kH), 0, 0), "the corner");
-	// In a wider window (2400x1000) it is 5 times bigger, with 400 pixels on each side
-	CHECK(CheckPoint(TouchControls::WindowToScreen(400.0f / 2400, 0, 2400, 1000, kW, kH), 0, 0), "the left border");
-	CHECK(CheckPoint(TouchControls::WindowToScreen(2000.0f / 2400, 0.999f, 2400, 1000, kW, kH), 320, 199),
-		"the right border");
-	CHECK(TouchControls::WindowToScreen(0.1f, 0.5f, 2400, 1000, kW, kH).x < 0, "out of the screen, on the side");
-	CHECK(CheckPoint(TouchControls::WindowToScreen(0.5f, 0.5f, 0, 0, kW, kH), -1, -1), "no window");
 
 	// With no GraphicsEngine the fingers are on a screen of the layout's size: the default one gives it,
 	// then a layout of the test's own, a stick on the left half and two buttons

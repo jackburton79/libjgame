@@ -98,34 +98,20 @@ ButtonAt(float x, float y)
 }
 
 
-// WindowToScreen(), without rounding
-bool
-MapToScreen(float x, float y, int windowW, int windowH, int screenW, int screenH,
-	float& screenX, float& screenY)
-{
-	if (windowW <= 0 || windowH <= 0 || screenW <= 0 || screenH <= 0)
-		return false;
-	const float scale = std::min((float)windowW / screenW, (float)windowH / screenH);
-	screenX = (x * windowW - (windowW - screenW * scale) / 2) / scale;
-	screenY = (y * windowH - (windowH - screenH * scale) / 2) / scale;
-	return true;
-}
-
-
-// Where the finger is on the screen, from the point of the window that SDL gives
+// Where the finger is on the screen. SDL gives it as a fraction of the window; but where the window has a
+// renderer (GraphicsEngine's), SDL has already made it a fraction of the screen the renderer shows in it,
+// however that is scaled and centred (a finger out of it, on a band at the side, is on its edge)
 void
 ToScreen(float x, float y, float& screenX, float& screenY)
 {
-	int windowW = sLayoutW, windowH = sLayoutH;
 	int screenW = sLayoutW, screenH = sLayoutH;
 	GraphicsEngine* gfx = GraphicsEngine::Get();
-	if (gfx != nullptr && gfx->Renderer() != nullptr && gfx->ScreenBitmap() != nullptr
-		&& SDL_GetRendererOutputSize(gfx->Renderer(), &windowW, &windowH) == 0) {
+	if (gfx != nullptr && gfx->Renderer() != nullptr && gfx->ScreenBitmap() != nullptr) {
 		screenW = gfx->ScreenBitmap()->Width();
 		screenH = gfx->ScreenBitmap()->Height();
 	}
-	if (!MapToScreen(x, y, windowW, windowH, screenW, screenH, screenX, screenY))
-		screenX = screenY = -1;
+	screenX = x * screenW;
+	screenY = y * screenH;
 }
 
 
@@ -404,18 +390,6 @@ TouchControls::Draw(Bitmap* target)
 				down ? dark : white, scale);
 		}
 	}
-}
-
-
-/* static */
-GFX::point
-TouchControls::WindowToScreen(float x, float y, int windowWidth, int windowHeight,
-	int screenWidth, int screenHeight)
-{
-	float screenX, screenY;
-	if (!MapToScreen(x, y, windowWidth, windowHeight, screenWidth, screenHeight, screenX, screenY))
-		return GFX::point(-1, -1);
-	return GFX::point((int16)std::floor(screenX), (int16)std::floor(screenY));
 }
 
 

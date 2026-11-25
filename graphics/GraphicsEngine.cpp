@@ -356,7 +356,10 @@ void
 GraphicsEngine::SetWindowSize(uint16 width, uint16 height)
 {
 	SDL_Window* window = fRenderContext->SDLWindow;
-	if (window == nullptr || (fFlags & VIDEOMODE_FULLSCREEN))
+	// Where the window is always the whole screen (Android) it has no size of
+	// its own: SDL would take the size as the window's all the same, and draw
+	// in that much of the screen only
+	if (window == nullptr || (fFlags & VIDEOMODE_FULLSCREEN) || !CanToggleFullscreen())
 		return;
 
 	SDL_SetWindowSize(window, width, height);
@@ -370,6 +373,9 @@ GraphicsEngine::IsFullscreen() const
 	SDL_Window* window = fRenderContext->SDLWindow;
 	if (window == nullptr)
 		return false;
+	// (SDL doesn't mark the window of Android as full screen, but it is)
+	if (!CanToggleFullscreen())
+		return true;
 	return (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) != 0;
 }
 
@@ -398,7 +404,7 @@ GraphicsEngine::SetFullscreen(bool on)
 bool
 GraphicsEngine::CanToggleFullscreen() const
 {
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IPHONEOS__)
 	return false;
 #else
 	return true;

@@ -53,11 +53,12 @@ public:
 	void SetVideoMode(uint16 x, uint16 y, uint16 depth, uint16 flags);
 	// The window can have a size of its own: the screen is scaled to fit it,
 	// keeping its proportions. A game can then draw at a low resolution and
-	// show it bigger. Call it after SetVideoMode().
+	// show it bigger. Call it after SetVideoMode(). Where the window is always
+	// the whole screen (Android, iOS) it does nothing.
 	void SetWindowSize(uint16 width, uint16 height);
 	// Full screen on and off while the game runs (VIDEOMODE_FULLSCREEN is only
 	// read when the window is made). The window keeps its own size for when
-	// it comes back. Where the window is always full screen (Android) there is
+	// it comes back. Where the window is always full screen (Android, iOS) there is
 	// nothing to switch: CanToggleFullscreen() is false, IsFullscreen() is true
 	// and SetFullscreen() does nothing, so a game can leave the option out.
 	bool IsFullscreen() const;
