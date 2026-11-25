@@ -391,7 +391,10 @@ TouchControls::Draw(Bitmap* target)
 		target->StrokeCircle(button.x, button.y, button.radius, down ? white : grey);
 		if (!button.label.empty()) {
 			const Font& font = Font::Builtin();
-			const int scale = std::max(1, button.radius / 6);
+			// As big as it fits in the button
+			int scale = std::max(1, button.radius / 6);
+			while (scale > 1 && font.TextWidth(button.label, scale) > button.radius * 2 - 4)
+				scale--;
 			font.DrawCentered(target, button.x, button.y - font.Height() * scale / 2, button.label,
 				down ? dark : white, scale);
 		}

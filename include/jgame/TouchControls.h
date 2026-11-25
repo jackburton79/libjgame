@@ -63,7 +63,7 @@ public:
 	static void RemoveStick();
 	// A round button centred on (x, y), that holds `key` (and `key2`, if it
 	// isn't KEY_NONE) while it is touched. `label` is written on it, with the
-	// built-in font.
+	// built-in font, as big as it fits.
 	static void AddButton(int16 x, int16 y, uint16 radius, Keyboard::Key key,
 		Keyboard::Key key2 = Keyboard::KEY_NONE, const char* label = nullptr);
 	static void RemoveButtons();
