@@ -5,6 +5,7 @@
 #include <jgame/Keyboard.h>
 
 #include <jgame/Gamepad.h>
+#include <jgame/TouchControls.h>
 
 #include <SDL.h>
 
@@ -92,6 +93,15 @@ scancode_for(Keyboard::Key key)
 }
 
 
+// A second key that counts as `key`: the Back key of a phone (Android's, the
+// one at the bottom of the screen or the gesture) is Escape
+static SDL_Scancode
+other_scancode_for(Keyboard::Key key)
+{
+	return key == Keyboard::KEY_ESCAPE ? SDL_SCANCODE_AC_BACK : SDL_SCANCODE_UNKNOWN;
+}
+
+
 /* static */
 bool
 Keyboard::IsShiftPressed()
@@ -104,12 +114,13 @@ Keyboard::IsShiftPressed()
 bool
 Keyboard::IsKeyDown(Key key)
 {
-	if (Gamepad::_IsKeyDown(key))
+	if (Gamepad::_IsKeyDown(key) || TouchControls::_IsKeyDown(key))
 		return true;
+	const Uint8* state = SDL_GetKeyboardState(nullptr);
 	const SDL_Scancode scancode = scancode_for(key);
-	if (scancode == SDL_SCANCODE_UNKNOWN)
-		return false;
-	return SDL_GetKeyboardState(nullptr)[scancode] != 0;
+	const SDL_Scancode other = other_scancode_for(key);
+	return (scancode != SDL_SCANCODE_UNKNOWN && state[scancode] != 0)
+		|| (other != SDL_SCANCODE_UNKNOWN && state[other] != 0);
 }
 
 
@@ -151,7 +162,7 @@ void
 Keyboard::_KeyDown(int scancode)
 {
 	for (int i = KEY_NONE + 1; i < KEY_COUNT; i++) {
-		if (scancode_for((Key)i) == scancode)
+		if (scancode_for((Key)i) == scancode || other_scancode_for((Key)i) == scancode)
 			sPressed[i] = true;
 	}
 }

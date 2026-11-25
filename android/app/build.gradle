@@ -1,0 +1,87 @@
+plugins {
+    id 'com.android.application'
+}
+
+// The game: its folder, and what it says about itself in jgame-android.properties
+def gameDir = file(project.rootDir.toPath().resolve(project.property('jgame.game').toString()).normalize().toString())
+def sdlDir = file(project.rootDir.toPath().resolve(project.property('jgame.sdl').toString()).normalize().toString())
+def gameFile = new File(gameDir, 'jgame-android.properties')
+if (!gameFile.exists())
+    throw new GradleException("No ${gameFile}: see libjgame/android/README.md")
+if (!new File(sdlDir, 'android-project').exists())
+    throw new GradleException("No SDL2 sources in ${sdlDir}: run get-sdl.sh first (see README.md)")
+def game = new Properties()
+gameFile.withInputStream { game.load(it) }
+def required = { String key ->
+    def value = game.getProperty(key)
+    if (value == null || value.trim().isEmpty())
+        throw new GradleException("${gameFile}: '${key}' is missing")
+    return value.trim()
+}
+def optional = { String key, String fallback -> (game.getProperty(key) ?: fallback).trim() }
+def gamePath = { String key -> def value = game.getProperty(key); value ? new File(gameDir, value.trim()) : null }
+
+android {
+    // The namespace of the (generated) R class: none of the game's code uses it
+    namespace 'org.libsdl.app'
+    compileSdk 35
+    ndkVersion optional('ndkVersion', '27.2.12479018')
+
+    defaultConfig {
+        applicationId required('applicationId')
+        minSdk optional('minSdk', '21').toInteger()
+        targetSdk 35
+        versionCode optional('versionCode', '1').toInteger()
+        versionName optional('versionName', '1.0')
+        manifestPlaceholders = [
+            appName: required('appName'),
+            // A game with an icon of its own gives a res folder (with mipmap-*/ic_launcher.png)
+            appIcon: gamePath('res') ? '@mipmap/ic_launcher' : '@android:drawable/sym_def_app_icon',
+            // landscape, portrait or fullSensor; SDL follows what the game's video mode asks too
+            orientation: optional('orientation', 'sensorLandscape'),
+        ]
+        externalNativeBuild {
+            cmake {
+                arguments "-DJGAME_SDL_DIR=${sdlDir}", "-DJGAME_GAME_DIR=${gameDir}",
+                    '-DANDROID_STL=c++_static'
+                // Extra definitions for the game's CMake, e.g. cmakeArguments=-DEMBED_DATA=ON
+                def extra = optional('cmakeArguments', '')
+                if (!extra.isEmpty())
+                    arguments(*extra.split(/\s+/))
+            }
+        }
+        ndk {
+            abiFilters(*optional('abis', 'armeabi-v7a arm64-v8a x86_64').split(/\s+/))
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            // Signed with the debug key unless the game sets one up: enough to try it on a phone
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path 'jni/CMakeLists.txt'
+            version optional('cmakeVersion', '3.22.1')
+        }
+    }
+
+    sourceSets.main {
+        // SDL's Java side (SDLActivity and its helpers) comes with its sources
+        java.srcDirs = ["${sdlDir}/android-project/app/src/main/java"]
+        def assets = gamePath('assets')
+        if (assets)
+            assets.srcDirs = [assets]
+        def res = gamePath('res')
+        if (res)
+            res.srcDirs = [res]
+    }
+
+    lint {
+        abortOnError false
+    }
+}

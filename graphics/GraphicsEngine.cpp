@@ -51,6 +51,9 @@ GraphicsEngine::GraphicsEngine()
 {
 	fRenderingOffset.x = fRenderingOffset.y = 0;
 	fOldRect.w = fOldRect.h = fOldRect.x = fOldRect.y = 0;
+	// Android: the Back key comes to the game as a key (Keyboard's Escape)
+	// instead of closing the program
+	SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 		throw std::runtime_error("GraphicsEngine: SDL Error");
 	SDL_ShowCursor(0);
@@ -303,6 +306,13 @@ GraphicsEngine::SetVideoMode(uint16 width, uint16 height, uint16 depth,
 		uint16 flags)
 {
 	if (fRenderContext->SDLWindow == nullptr) {
+		// Phones and tablets: the screen turns only between the orientations
+		// that suit the mode, so that a wide game is never shown on a screen
+		// held upright (a game can say otherwise by setting the hint first)
+		if (SDL_GetHint(SDL_HINT_ORIENTATIONS) == nullptr) {
+			SDL_SetHint(SDL_HINT_ORIENTATIONS, width >= height
+				? "LandscapeLeft LandscapeRight" : "Portrait PortraitUpsideDown");
+		}
 		int SDLWindowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
 		if (flags & VIDEOMODE_FULLSCREEN)
 			SDLWindowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
@@ -346,7 +356,10 @@ void
 GraphicsEngine::SetWindowSize(uint16 width, uint16 height)
 {
 	SDL_Window* window = fRenderContext->SDLWindow;
-	if (window == nullptr || (fFlags & VIDEOMODE_FULLSCREEN))
+	// Where the window is always the whole screen (Android) it has no size of
+	// its own: SDL would take the size as the window's all the same, and draw
+	// in that much of the screen only
+	if (window == nullptr || (fFlags & VIDEOMODE_FULLSCREEN) || !CanToggleFullscreen())
 		return;
 
 	SDL_SetWindowSize(window, width, height);
@@ -360,6 +373,9 @@ GraphicsEngine::IsFullscreen() const
 	SDL_Window* window = fRenderContext->SDLWindow;
 	if (window == nullptr)
 		return false;
+	// (SDL doesn't mark the window of Android as full screen, but it is)
+	if (!CanToggleFullscreen())
+		return true;
 	return (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) != 0;
 }
 
@@ -388,7 +404,7 @@ GraphicsEngine::SetFullscreen(bool on)
 bool
 GraphicsEngine::CanToggleFullscreen() const
 {
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IPHONEOS__)
 	return false;
 #else
 	return true;

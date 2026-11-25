@@ -33,7 +33,9 @@ public:
 
 	static bool IsShiftPressed();
 
-	// Whether the key is held down right now
+	// Whether the key is held down right now. The keys a game controller or the
+	// touch controls stand for count too (see Gamepad.h and TouchControls.h), and
+	// so does the Back key of a phone, as Escape.
 	static bool IsKeyDown(Key key);
 	// Whether the key went down since the last Events::Pump() (no auto-repeat)
 	static bool WasKeyPressed(Key key);
@@ -46,6 +48,7 @@ public:
 private:
 	friend class Events;
 	friend class Gamepad;
+	friend class TouchControls;
 	static void _BeginFrame();
 	static void _KeyDown(int scancode);
 	// A key a game controller stands for went down (see Gamepad.h)

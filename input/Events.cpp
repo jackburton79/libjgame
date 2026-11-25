@@ -7,6 +7,7 @@
 #include <jgame/Gamepad.h>
 #include <jgame/Keyboard.h>
 #include <jgame/Timer.h>
+#include <jgame/TouchControls.h>
 
 #include <SDL.h>
 
@@ -14,6 +15,9 @@ namespace jgame {
 
 
 static bool sQuitRequested = false;
+static bool sInBackground = false;
+static bool sWentToBackground = false;
+static bool sCameToForeground = false;
 
 
 /* static */
@@ -22,12 +26,28 @@ Events::Pump()
 {
 	Gamepad::_Initialize();
 	Keyboard::_BeginFrame();
+	TouchControls::_BeginFrame();
+	sWentToBackground = sCameToForeground = false;
 
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
+		TouchControls::_HandleEvent(event);
 		switch (event.type) {
 			case SDL_QUIT:
+			case SDL_APP_TERMINATING:
 				sQuitRequested = true;
+				break;
+			case SDL_APP_WILLENTERBACKGROUND:
+			case SDL_APP_DIDENTERBACKGROUND:
+				if (!sInBackground)
+					sWentToBackground = true;
+				sInBackground = true;
+				break;
+			case SDL_APP_WILLENTERFOREGROUND:
+			case SDL_APP_DIDENTERFOREGROUND:
+				if (sInBackground)
+					sCameToForeground = true;
+				sInBackground = false;
 				break;
 			case SDL_KEYDOWN:
 				if (!event.key.repeat)
@@ -62,6 +82,30 @@ void
 Events::RequestQuit()
 {
 	sQuitRequested = true;
+}
+
+
+/* static */
+bool
+Events::IsInBackground()
+{
+	return sInBackground;
+}
+
+
+/* static */
+bool
+Events::WentToBackground()
+{
+	return sWentToBackground;
+}
+
+
+/* static */
+bool
+Events::CameToForeground()
+{
+	return sCameToForeground;
 }
 
 } // namespace jgame

@@ -67,7 +67,43 @@ main()
 	Events::Pump();
 	CHECK(sTimerCalls == 3, "timer callback ran");
 
+	// A phone's app going to the background and back
+	const auto pushApp = [](Uint32 type) {
+		SDL_Event app;
+		SDL_zero(app);
+		app.type = type;
+		SDL_PushEvent(&app);
+	};
+	CHECK(!Events::IsInBackground() && !Events::WentToBackground(), "in the foreground");
+	pushApp(SDL_APP_WILLENTERBACKGROUND);
+	pushApp(SDL_APP_DIDENTERBACKGROUND);
+	Events::Pump();
+	CHECK(Events::IsInBackground(), "in the background");
+	CHECK(Events::WentToBackground(), "went to the background");
+	CHECK(!Events::CameToForeground(), "not back yet");
+	Events::Pump();
+	CHECK(Events::IsInBackground() && !Events::WentToBackground(), "going there lasts one pump");
+	pushApp(SDL_APP_WILLENTERFOREGROUND);
+	pushApp(SDL_APP_DIDENTERFOREGROUND);
+	Events::Pump();
+	CHECK(!Events::IsInBackground() && Events::CameToForeground(), "back");
+	Events::Pump();
+	CHECK(!Events::CameToForeground(), "coming back lasts one pump");
+
+	// The Back key of a phone is Escape
+	SDL_Event back;
+	SDL_zero(back);
+	back.type = SDL_KEYDOWN;
+	back.key.keysym.scancode = SDL_SCANCODE_AC_BACK;
+	SDL_PushEvent(&back);
+	Events::Pump();
+	CHECK(Keyboard::WasKeyPressed(Keyboard::KEY_ESCAPE), "Back presses Escape");
+
 	CHECK(!Events::QuitRequested(), "no quit yet");
+	pushApp(SDL_APP_TERMINATING);
+	Events::Pump();
+	CHECK(Events::QuitRequested(), "the system ending the program is a quit");
+	Events::RequestQuit();
 	SDL_Event quit;
 	SDL_zero(quit);
 	quit.type = SDL_QUIT;
