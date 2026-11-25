@@ -239,6 +239,11 @@ FillCircleDithered(Bitmap* target, int cx, int cy, int radius, uint32 color, uin
 void
 TouchControls::SetMode(Mode mode)
 {
+	// On for good: SDL makes fingers of the mouse too
+	if (mode == MODE_ON)
+		SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "1");
+	else if (sMode == MODE_ON)
+		SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
 	sMode = mode;
 	if (mode == MODE_OFF)
 		ReleaseAll();
@@ -456,7 +461,7 @@ TouchControls::_HandleEvent(const union SDL_Event& event)
 	if (sMode == MODE_OFF)
 		return;
 	// A mouse that SDL makes into a finger is not a touch screen (but where the controls are on for good, it
-	// is a way to try them on a computer: see SDL_HINT_MOUSE_TOUCH_EVENTS)
+	// is a way to try them on a computer: see SetMode())
 	if (event.tfinger.touchId == SDL_MOUSE_TOUCHID && sMode != MODE_ON)
 		return;
 
