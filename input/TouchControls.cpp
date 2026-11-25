@@ -397,7 +397,7 @@ TouchControls::Draw(Bitmap* target)
 		if (!button.label.empty()) {
 			const Font& font = Font::Builtin();
 			// As big as it fits in the button
-			int scale = std::max(1, button.radius / 6);
+			int scale = std::max(1, button.radius / 8);
 			while (scale > 1 && font.TextWidth(button.label, scale) > button.radius * 2 - 4)
 				scale--;
 			font.DrawCentered(target, button.x, button.y - font.Height() * scale / 2, button.label,
