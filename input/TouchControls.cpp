@@ -455,8 +455,9 @@ TouchControls::_HandleEvent(const union SDL_Event& event)
 	}
 	if (sMode == MODE_OFF)
 		return;
-	// A mouse that SDL makes into a finger is not a touch screen
-	if (event.tfinger.touchId == SDL_MOUSE_TOUCHID)
+	// A mouse that SDL makes into a finger is not a touch screen (but where the controls are on for good, it
+	// is a way to try them on a computer: see SDL_HINT_MOUSE_TOUCH_EVENTS)
+	if (event.tfinger.touchId == SDL_MOUSE_TOUCHID && sMode != MODE_ON)
 		return;
 
 	bool before[Keyboard::KEY_COUNT];

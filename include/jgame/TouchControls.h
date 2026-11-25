@@ -48,6 +48,9 @@ public:
 		// on a phone or a tablet with a touch screen), hidden again when a key
 		// of a keyboard or a button of a game controller is used
 		MODE_AUTO,
+		// Always shown and working. Then the mouse works as a finger too, where the
+		// game sets SDL_HINT_MOUSE_TOUCH_EVENTS to "1": a way to try them on a
+		// computer
 		MODE_ON,
 		MODE_OFF
 	};

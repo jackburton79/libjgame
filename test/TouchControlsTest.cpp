@@ -179,6 +179,11 @@ main()
 	TouchControls::SetMode(TouchControls::MODE_ON);
 	Events::Pump();
 	CHECK(TouchControls::IsActive(), "on");
+	PushFinger(SDL_FINGERDOWN, 8, 280, 160, SDL_MOUSE_TOUCHID);
+	Events::Pump();
+	CHECK(Keyboard::IsKeyDown(Keyboard::KEY_SPACE), "on for good, the mouse is a finger");
+	PushFinger(SDL_FINGERUP, 8, 280, 160, SDL_MOUSE_TOUCHID);
+	Events::Pump();
 
 	// Drawing: something is drawn on the buttons, and nothing far from them
 	Bitmap* screen = new Bitmap(kW, kH, 32);
