@@ -1,0 +1,7 @@
+SDL/
+SDL.tmp/
+.gradle/
+build/
+app/build/
+app/.cxx/
+local.properties

@@ -28,6 +28,33 @@ jobs:
         make install PREFIX=$PWD/_install
         PKG_CONFIG_PATH=$PWD/_install/lib/pkgconfig g++ -std=c++17 -Wall -Werror examples/minimal.cpp \
           $(PKG_CONFIG_PATH=$PWD/_install/lib/pkgconfig pkg-config --cflags --libs jgame) -o minimal
+    - name: cmake
+      # The CMake build of the same sources, with its tests, and the example through it
+      run: |
+        cmake -S . -B _cmake -DCMAKE_BUILD_TYPE=Release
+        cmake --build _cmake -j$(nproc)
+        (cd _cmake && ctest --output-on-failure)
+        cmake -S examples -B _cmake-example && cmake --build _cmake-example -j$(nproc)
+
+  # The Android project (android/), building the example into an APK. The runner has the SDK; the NDK
+  # and CMake the project asks for are installed by Gradle
+  android:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 17
+    - name: sdl-sources
+      run: android/get-sdl.sh
+    - name: apk
+      working-directory: android
+      run: ./gradlew assembleDebug -Pjgame.game=../examples --no-daemon
+    - uses: actions/upload-artifact@v4
+      with:
+        name: jgame-minimal-apk
+        path: android/app/build/outputs/apk/debug/*.apk
 
   # The same on a Mac (Apple's clang, SDL2 from Homebrew)
   macos:

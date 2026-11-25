@@ -21,7 +21,8 @@ using namespace jgame;
 
 The file that defines `main()` also includes `<jgame/Main.h>` (not part of
 `jgame.h`): on Windows and Android SDL renames `main()` to `SDL_main()`, and
-this header declares it the way SDL needs.
+this header declares it the way SDL needs. `main()` must then have its
+arguments, `int main(int argc, char** argv)`: SDL looks for one with them.
 
 ## Modules
 
@@ -32,10 +33,10 @@ The sources are grouped in a directory per module; the headers named here are in
 |-------------|------------------|
 | `graphics/` | `GraphicsEngine` (window, renderer, video modes, screen scaling, fade, screenshots), `Bitmap` (software surface with pixel/line/rect/polygon drawing, dithered fills, colour key, alpha, palettes, masked and scaled blits), `Polygon`, and text: `Font`, the interface a font has to implement (so a game can use fonts of its own), `FontLoader`, where fonts come from, and a tiny built-in 3x5 pixel font that needs no font files (`Font::Builtin()`). |
 | `audio/`    | `SoundEngine`, one audio device that mixes a music stream, up to 8 overlapping one-shot samples and a raw ring buffer, with volume and fades; `AudioStream`, the interface for streamed music; `Synth`, a small synthesiser that turns a text "recipe" into sound effects, with no audio files and no audio device required. |
-| `input/`    | `Events`, the per-frame event pump and quit handling; `Keyboard`, polled key state independent from SDL; `Gamepad`, game controllers as keys: `Keyboard` answers for the keys a pad stands for, so a game that reads the keyboard works with a pad as it is (the mapping is in `Gamepad.h`). |
+| `input/`    | `Events`, the per-frame event pump, quit handling and, on phones and tablets, the program going to the background and back; `Keyboard`, polled key state independent from SDL (a phone's Back key is Escape); `Gamepad`, game controllers as keys: `Keyboard` answers for the keys a pad stands for, so a game that reads the keyboard works with a pad as it is (the mapping is in `Gamepad.h`); `TouchControls`, a stick and buttons drawn on a touch screen, that press keys the same way. |
 | `timers/`   | `Timer`: named timers, one-shot and periodic callbacks, tick counting and frame-rate sync helpers. |
 | `streams/`  | A `Stream` abstraction with file, memory and string implementations, plus `EncryptedStream`, a wrapper that decrypts another stream with a key. |
-| `support/`  | Basic types (`SupportDefs.h`), reference counting (`Referenceable`, `Reference<T>`), `Path`, `Log`, `Bytes`, zlib decompression (`ZLibDecompressor`), `Rng`, a small deterministic and portable header-only random generator, and assorted utilities. |
+| `support/`  | Basic types (`SupportDefs.h`), reference counting (`Referenceable`, `Reference<T>`), `Path`, `Platform` (which system it is, and the folder where the user's files go on each), `Log`, `Bytes`, zlib decompression (`ZLibDecompressor`), `Rng`, a small deterministic and portable header-only random generator, and assorted utilities. |
 
 ## Requirements
 
@@ -56,7 +57,8 @@ On macOS (Homebrew):
 brew install sdl2
 ```
 
-The library is built and tested on Linux and macOS by CI.
+The library is built and tested on Linux and macOS by CI. It also builds with
+CMake (see below), and for Android: see [Android](#android).
 
 ## Building
 
@@ -97,6 +99,19 @@ g++ -std=c++17 mygame.cpp $(pkg-config --cflags --libs jgame) -o mygame
 If the prefix is not one pkg-config looks into, add `$PREFIX/lib/pkgconfig` to
 `PKG_CONFIG_PATH`. `make uninstall` removes everything.
 
+### With CMake
+
+`CMakeLists.txt` builds the same library (and the tests, when it is the top
+project: `ctest` runs them). In a CMake project:
+
+```cmake
+add_subdirectory(libjgame)
+target_link_libraries(mygame PRIVATE jgame)
+```
+
+It uses the SDL2 target the project has (`SDL2::SDL2` or `SDL2`), or else the
+one installed on the system.
+
 ### Without installing
 
 Point the include path at `include` and link the library, SDL2 and zlib:
@@ -113,10 +128,11 @@ g++ -std=c++17 -I/path/to/libjgame/include $(sdl2-config --cflags) \
 
 ```cpp
 #include <jgame/jgame.h>
+#include <jgame/Main.h>
 
 using namespace jgame;
 
-int main()
+int main(int, char**)
 {
 	if (!GraphicsEngine::Initialize() || !Timer::Initialize())
 		return 1;
@@ -146,6 +162,15 @@ int main()
 
 The programs in `test/` are also good examples of how each module is used
 (for instance `FontTest.cpp`, `SynthTest.cpp` and `EventsTest.cpp`).
+
+## Android
+
+[`android/`](android/README.md) is an Android project that builds any game
+made with libjgame into an APK: the game gives a `CMakeLists.txt` and a
+`jgame-android.properties`, and `./gradlew assembleDebug` does the rest. For
+the touch screen there is `TouchControls`; `Events::WentToBackground()` and
+`Platform::UserDataDirectory()` are the other things a game has to care about
+there. All of it is in [`android/README.md`](android/README.md).
 
 ## License
 

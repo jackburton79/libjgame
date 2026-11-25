@@ -7,8 +7,9 @@
 
 using namespace jgame;
 
+// (main() with its arguments: on Android and Windows SDL calls it by that name)
 int
-main()
+main(int, char**)
 {
 	if (!GraphicsEngine::Initialize() || !Timer::Initialize())
 		return 1;
