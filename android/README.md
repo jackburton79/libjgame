@@ -83,9 +83,13 @@ which is enough to try it on a phone; to publish it, give it a key of your own
 ## What libjgame does on Android
 
 - **Touch screen**: `TouchControls` draws a stick and buttons over the game
-  and presses keys with them (see `TouchControls.h`); a game has to call
-  `TouchControls::Draw()` each frame and choose a layout
-  (`UseDefaultLayout()` gives the buttons of a game controller).
+  and presses keys with them (see `TouchControls.h`). `GraphicsEngine` draws
+  them, so a game only has to choose a layout (`UseDefaultLayout()` gives the
+  buttons of a game controller). A phone's screen is wider than a 4:3 game's:
+  the controls can be on the bands at the sides, where the thumbs are and the
+  game isn't. `TouchControls::VisibleArea()` is what the window shows, bands
+  included, in the game's pixels; lay the controls out on that, and again
+  when it changes (the phone is turned).
 - **Back key**: it is Escape (`Keyboard::KEY_ESCAPE`) and doesn't close the
   program.
 - **The background**: `Events::WentToBackground()` says when to pause and save
