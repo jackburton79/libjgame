@@ -1,4 +1,3 @@
-#include <jgame/Bitmap.h>
 #include <jgame/Events.h>
 #include <jgame/Keyboard.h>
 #include <jgame/TouchControls.h>
@@ -168,19 +167,6 @@ main()
 	CHECK(Keyboard::IsKeyDown(Keyboard::KEY_SPACE), "on for good, the mouse is a finger");
 	PushFinger(SDL_FINGERUP, 8, 280, 160, SDL_MOUSE_TOUCHID);
 	Events::Pump();
-
-	// Drawing: something is drawn on the buttons, and nothing far from them
-	Bitmap* screen = new Bitmap(kW, kH, 32);
-	screen->Clear(0);
-	TouchControls::UseDefaultLayout(kW, kH);
-	TouchControls::Draw(screen);
-	int drawn = 0;
-	for (int y = 0; y < kH; y++)
-		for (int x = 0; x < kW; x++)
-			drawn += screen->GetPixel(x, y) != 0 ? 1 : 0;
-	CHECK(drawn > 0, "the controls are drawn");
-	CHECK(screen->GetPixel(kW / 2, 2) == 0, "not all over the screen");
-	screen->Release();
 
 	SDL_Quit();
 	if (sFailures == 0)

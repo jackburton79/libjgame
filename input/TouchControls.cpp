@@ -26,6 +26,9 @@ struct Button {
 	int radius;
 	Keyboard::Key keys[2];
 	std::string label;
+	// The label as pixels (made when it is first drawn, with the built-in font)
+	std::vector<uint8> mask;
+	int maskW = 0, maskH = 0;
 };
 
 // What a finger is doing: on the stick, on a button (or on none, sliding about
@@ -98,20 +101,23 @@ ButtonAt(float x, float y)
 }
 
 
-// Where the finger is on the screen. SDL gives it as a fraction of the window; but where the window has a
-// renderer (GraphicsEngine's), SDL has already made it a fraction of the screen the renderer shows in it,
-// however that is scaled and centred (a finger out of it, on a band at the side, is on its edge)
+// Where the finger is in the screen's pixels. SDL gives it as a fraction of the window (GraphicsEngine puts no
+// logical size on the renderer, so that SDL leaves it alone): the window's pixel, less where the screen starts,
+// over how big it is shown. A finger on a band at the side is out of the screen: before 0 or past its size.
 void
 ToScreen(float x, float y, float& screenX, float& screenY)
 {
-	int screenW = sLayoutW, screenH = sLayoutH;
 	GraphicsEngine* gfx = GraphicsEngine::Get();
 	if (gfx != nullptr && gfx->Renderer() != nullptr && gfx->ScreenBitmap() != nullptr) {
-		screenW = gfx->ScreenBitmap()->Width();
-		screenH = gfx->ScreenBitmap()->Height();
+		const GraphicsEngine::ScreenPlacement place = gfx->Placement();
+		if (place.outputWidth > 0) {
+			screenX = (x * place.outputWidth - place.x) / place.scale;
+			screenY = (y * place.outputHeight - place.y) / place.scale;
+			return;
+		}
 	}
-	screenX = x * screenW;
-	screenY = y * screenH;
+	screenX = x * sLayoutW;
+	screenY = y * sLayoutH;
 }
 
 
@@ -209,14 +215,80 @@ ReleaseAll()
 }
 
 
-void
-FillCircleDithered(Bitmap* target, int cx, int cy, int radius, uint32 color, uint8 level)
-{
-	for (int dy = -radius; dy <= radius; dy++) {
-		const int half = (int)std::sqrt((float)(radius * radius - dy * dy));
-		target->FillRectDithered(GFX::rect(cx - half, cy + dy, 2 * half + 1, 1), color, level);
+// What is drawn over the window: everything is in the screen's pixels, and goes through here to the window's
+struct Painter {
+	SDL_Renderer* renderer;
+	float scale, x, y;
+
+	float X(float sx) const { return x + sx * scale; }
+	float Y(float sy) const { return y + sy * scale; }
+
+	void SetColor(int r, int g, int b, int a) const { SDL_SetRenderDrawColor(renderer, r, g, b, a); }
+
+	// A disc, a line of the window's pixels at a time
+	void Disc(float cx, float cy, float radius) const
+	{
+		const float px = X(cx), py = Y(cy), R = radius * scale;
+		for (int dy = -(int)R; dy <= (int)R; dy++) {
+			const float half = std::sqrt(std::max(0.0f, R * R - (float)dy * dy));
+			SDL_RenderDrawLineF(renderer, px - half, py + dy, px + half, py + dy);
+		}
 	}
-}
+
+	// A ring `thickness` (of the screen's pixels) wide
+	void Ring(float cx, float cy, float radius, float thickness) const
+	{
+		const float px = X(cx), py = Y(cy), R = radius * scale, inner = std::max(0.0f, R - thickness * scale);
+		for (int dy = -(int)R; dy <= (int)R; dy++) {
+			const float outerHalf = std::sqrt(std::max(0.0f, R * R - (float)dy * dy));
+			if (std::fabs((float)dy) >= inner) {
+				SDL_RenderDrawLineF(renderer, px - outerHalf, py + dy, px + outerHalf, py + dy);
+				continue;
+			}
+			const float innerHalf = std::sqrt(std::max(0.0f, inner * inner - (float)dy * dy));
+			SDL_RenderDrawLineF(renderer, px - outerHalf, py + dy, px - innerHalf, py + dy);
+			SDL_RenderDrawLineF(renderer, px + innerHalf, py + dy, px + outerHalf, py + dy);
+		}
+	}
+
+	// The label of a button, centred in it, as big as fits (in whole pixels of the screen)
+	void Label(Button& button, bool dark) const
+	{
+		if (button.label.empty())
+			return;
+		if (button.mask.empty()) {
+			const Font& font = Font::Builtin();
+			button.maskW = std::max(1, font.TextWidth(button.label));
+			button.maskH = std::max(1, font.Height());
+			Bitmap* bitmap = new Bitmap(button.maskW, button.maskH, 32);
+			bitmap->Clear(0);
+			font.DrawText(bitmap, 0, 0, button.label, bitmap->MapRGBColor(255, 255, 255));
+			button.mask.assign(button.maskW * button.maskH, 0);
+			for (int py = 0; py < button.maskH; py++)
+				for (int px = 0; px < button.maskW; px++)
+					button.mask[py * button.maskW + px] = bitmap->GetPixel(px, py) != 0 ? 1 : 0;
+			bitmap->Release();
+		}
+		int size = std::max(1, button.radius / 8);
+		while (size > 1 && button.maskW * size > button.radius * 2 - 4)
+			size--;
+		const float left = button.x - button.maskW * size / 2.0f, top = button.y - button.maskH * size / 2.0f;
+		if (dark)
+			SetColor(20, 20, 30, 255);
+		else
+			SetColor(255, 255, 255, 235);
+		for (int py = 0; py < button.maskH; py++) {
+			for (int px = 0; px < button.maskW; px++) {
+				if (!button.mask[py * button.maskW + px])
+					continue;
+				// The corners come from the same numbers, so that the squares fit with no gap
+				const float x0 = X(left + px * size), y0 = Y(top + py * size);
+				SDL_FRect rect = { x0, y0, X(left + (px + 1) * size) - x0, Y(top + (py + 1) * size) - y0 };
+				SDL_RenderFillRectF(renderer, &rect);
+			}
+		}
+	}
+};
 
 } // namespace
 
@@ -311,6 +383,22 @@ TouchControls::SetTapKey(Keyboard::Key key)
 
 
 /* static */
+GFX::rect
+TouchControls::VisibleArea()
+{
+	GraphicsEngine* gfx = GraphicsEngine::Get();
+	if (gfx != nullptr && gfx->Renderer() != nullptr && gfx->ScreenBitmap() != nullptr) {
+		const GraphicsEngine::ScreenPlacement place = gfx->Placement();
+		if (place.outputWidth > 0) {
+			return GFX::rect((sint16)std::floor(-place.x / place.scale), (sint16)std::floor(-place.y / place.scale),
+				(uint16)std::lround(place.outputWidth / place.scale), (uint16)std::lround(place.outputHeight / place.scale));
+		}
+	}
+	return GFX::rect(0, 0, sLayoutW, sLayoutH);
+}
+
+
+/* static */
 void
 TouchControls::UseDefaultLayout(uint16 width, uint16 height)
 {
@@ -319,42 +407,52 @@ TouchControls::UseDefaultLayout(uint16 width, uint16 height)
 	RemoveStick();
 	RemoveButtons();
 
+	const GFX::rect area = VisibleArea();
+	const int right = area.x + area.w, bottom = area.y + area.h;
 	// Sized on the shorter side, so that it works on a wide screen and a square one
-	const int unit = std::max(4, std::min<int>(width, height) / 12);
+	const int unit = std::max(4, std::min<int>(area.w, area.h) / 12);
 	const int margin = unit / 2;
-	SetStick(GFX::rect(0, height / 4, width / 2, height - height / 4), unit * 2);
+	// The left half of the visible area (the band at the side included), but for the top quarter, where
+	// nothing is to be done
+	SetStick(GFX::rect(area.x, area.y + area.h / 4, area.w / 2, area.h - area.h / 4), unit * 2);
 
 	// A diamond of buttons, as on a pad: A at the bottom, B on the right, X on the left, Y on top
 	const int r = unit;
-	const int cx = width - margin - r * 3, cy = height - margin - r * 3;
+	const int cx = right - margin - r * 3, cy = bottom - margin - r * 3;
 	AddButton(cx, cy + r * 2, r, Keyboard::KEY_SPACE, Keyboard::KEY_RETURN, "A");
 	AddButton(cx + r * 2, cy, r, Keyboard::KEY_X, Keyboard::KEY_NONE, "B");
 	AddButton(cx - r * 2, cy, r, Keyboard::KEY_E, Keyboard::KEY_NONE, "X");
 	AddButton(cx, cy - r * 2, r, Keyboard::KEY_R, Keyboard::KEY_NONE, "Y");
 	// Start, small, out of the way of the thumbs
 	const int small = std::max(3, unit * 2 / 3);
-	AddButton(width - margin - small, margin + small, small, Keyboard::KEY_P, Keyboard::KEY_NONE, "II");
+	AddButton(right - margin - small, area.y + margin + small, small, Keyboard::KEY_P, Keyboard::KEY_NONE, "II");
 }
 
 
 /* static */
 void
-TouchControls::Draw(Bitmap* target)
+TouchControls::_Render(SDL_Renderer* renderer, float scale, float x, float y)
 {
-	if (target == nullptr || !IsOn())
+	if (renderer == nullptr || !IsOn() || (!sHasStick && sButtons.empty()))
 		return;
-	const uint32 white = target->MapRGBColor(255, 255, 255);
-	const uint32 grey = target->MapRGBColor(150, 150, 160);
-	const uint32 dark = target->MapRGBColor(20, 20, 30);
+	const Painter paint = { renderer, scale, x, y };
+	SDL_BlendMode oldBlend;
+	Uint8 oldR, oldG, oldB, oldA;
+	SDL_GetRenderDrawBlendMode(renderer, &oldBlend);
+	SDL_GetRenderDrawColor(renderer, &oldR, &oldG, &oldB, &oldA);
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
 	bool held[Keyboard::KEY_COUNT];
 	HeldKeys(held);
+	const float line = 1.0f;		// the rings are a pixel of the screen thick
 
 	if (sHasStick) {
 		Finger* finger;
 		if (StickFinger(&finger)) {
-			FillCircleDithered(target, (int)sStickX, (int)sStickY, sStickRadius, dark, 6);
-			target->StrokeCircle((int16)sStickX, (int16)sStickY, sStickRadius, grey);
+			paint.SetColor(20, 20, 30, 110);
+			paint.Disc(sStickX, sStickY, sStickRadius);
+			paint.SetColor(150, 150, 160, 200);
+			paint.Ring(sStickX, sStickY, sStickRadius, line);
 			// The knob, where the finger is (no further than the edge)
 			float dx = finger->x - sStickX, dy = finger->y - sStickY;
 			const float length = std::hypot(dx, dy);
@@ -362,34 +460,41 @@ TouchControls::Draw(Bitmap* target)
 				dx = dx * sStickRadius / length;
 				dy = dy * sStickRadius / length;
 			}
-			const int knob = std::max(2, sStickRadius / 2);
-			FillCircleDithered(target, (int)(sStickX + dx), (int)(sStickY + dy), knob, white, 8);
-			target->StrokeCircle((int16)(sStickX + dx), (int16)(sStickY + dy), knob, white);
+			const float knob = std::max(2, sStickRadius / 2);
+			paint.SetColor(255, 255, 255, 150);
+			paint.Disc(sStickX + dx, sStickY + dy, knob);
+			paint.SetColor(255, 255, 255, 230);
+			paint.Ring(sStickX + dx, sStickY + dy, knob, line);
 		} else {
 			// Where to put the thumb: a faint ring in the lower part of the area
-			const int x = sStickArea.x + std::min<int>(sStickArea.w / 2, sStickRadius * 2);
-			const int y = sStickArea.y + sStickArea.h - std::min<int>(sStickArea.h / 2, sStickRadius * 2);
-			FillCircleDithered(target, x, y, sStickRadius, dark, 4);
-			target->StrokeCircle(x, y, sStickRadius, grey);
+			const float cx = sStickArea.x + std::min<float>(sStickArea.w / 2.0f, sStickRadius * 1.5f);
+			const float cy = sStickArea.y + sStickArea.h - std::min<float>(sStickArea.h / 2.0f, sStickRadius * 1.5f);
+			paint.SetColor(20, 20, 30, 70);
+			paint.Disc(cx, cy, sStickRadius);
+			paint.SetColor(150, 150, 160, 160);
+			paint.Ring(cx, cy, sStickRadius, line);
 		}
 	}
 
-	for (const Button& button : sButtons) {
+	for (Button& button : sButtons) {
 		bool down = false;
 		for (Keyboard::Key key : button.keys)
 			down = down || (key > Keyboard::KEY_NONE && key < Keyboard::KEY_COUNT && held[key]);
-		FillCircleDithered(target, button.x, button.y, button.radius, down ? white : dark, down ? 8 : 6);
-		target->StrokeCircle(button.x, button.y, button.radius, down ? white : grey);
-		if (!button.label.empty()) {
-			const Font& font = Font::Builtin();
-			// As big as it fits in the button
-			int scale = std::max(1, button.radius / 8);
-			while (scale > 1 && font.TextWidth(button.label, scale) > button.radius * 2 - 4)
-				scale--;
-			font.DrawCentered(target, button.x, button.y - font.Height() * scale / 2, button.label,
-				down ? dark : white, scale);
-		}
+		if (down)
+			paint.SetColor(255, 255, 255, 200);
+		else
+			paint.SetColor(20, 20, 30, 150);
+		paint.Disc(button.x, button.y, button.radius);
+		if (down)
+			paint.SetColor(255, 255, 255, 255);
+		else
+			paint.SetColor(150, 150, 160, 210);
+		paint.Ring(button.x, button.y, button.radius, line);
+		paint.Label(button, down);
 	}
+
+	SDL_SetRenderDrawBlendMode(renderer, oldBlend);
+	SDL_SetRenderDrawColor(renderer, oldR, oldG, oldB, oldA);
 }
 
 

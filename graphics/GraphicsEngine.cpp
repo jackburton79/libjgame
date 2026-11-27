@@ -3,6 +3,9 @@
 #include <jgame/Bitmap.h>
 #include <jgame/GraphicsEngine.h>
 #include <jgame/Log.h>
+#include <jgame/TouchControls.h>
+
+#include <algorithm>
 
 #include <SDL.h>
 
@@ -331,7 +334,10 @@ GraphicsEngine::SetVideoMode(uint16 width, uint16 height, uint16 depth,
 	// Read when the texture is created: smooth scaling, unless asked otherwise
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY,
 		(flags & VIDEOMODE_PIXELATED) ? "nearest" : "linear");
-	SDL_RenderSetLogicalSize(fRenderContext->SDLRenderer, width, height);
+	// The engine places the screen in the window itself (see Placement()), so that what is drawn over the
+	// window and the fingers (see TouchControls.h) can be in the window's own pixels, bands included, not
+	// only in those of the screen
+	SDL_RenderSetLogicalSize(fRenderContext->SDLRenderer, 0, 0);
 
 	// TODO: We don't respect the depth parameter
 	SDL_Surface* surface = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
@@ -486,11 +492,37 @@ GraphicsEngine::Update()
 			fScreen->Surface()->pixels,
 			fScreen->Surface()->pitch);
 	SDL_RenderClear(fRenderContext->SDLRenderer);
-	SDL_Rect rect = { 0, 0, ScreenFrame().w, ScreenFrame().h };
-	rect.x = fRenderingOffset.x;
-	rect.y = fRenderingOffset.y;
-	SDL_RenderCopy(fRenderContext->SDLRenderer, fRenderContext->SDLTexture, nullptr, &rect);
+	const ScreenPlacement place = Placement();
+	SDL_FRect rect = {
+		place.x + fRenderingOffset.x * place.scale,
+		place.y + fRenderingOffset.y * place.scale,
+		ScreenFrame().w * place.scale,
+		ScreenFrame().h * place.scale
+	};
+	SDL_RenderCopyF(fRenderContext->SDLRenderer, fRenderContext->SDLTexture, nullptr, &rect);
+	// The touch controls (when there are any) go over the window, bands and all
+	TouchControls::_Render(fRenderContext->SDLRenderer, place.scale, place.x, place.y);
 	SDL_RenderPresent(fRenderContext->SDLRenderer);
+}
+
+
+GraphicsEngine::ScreenPlacement
+GraphicsEngine::Placement() const
+{
+	ScreenPlacement place = { 1.0f, 0.0f, 0.0f, 0, 0 };
+	SDL_Renderer* renderer = fRenderContext->SDLRenderer;
+	if (renderer == nullptr || fScreen == nullptr)
+		return place;
+	int width = 0, height = 0;
+	if (SDL_GetRendererOutputSize(renderer, &width, &height) != 0 || width <= 0 || height <= 0)
+		return place;
+	const float screenW = fScreen->Width(), screenH = fScreen->Height();
+	place.scale = std::min(width / screenW, height / screenH);
+	place.x = (width - screenW * place.scale) / 2;
+	place.y = (height - screenH * place.scale) / 2;
+	place.outputWidth = width;
+	place.outputHeight = height;
+	return place;
 }
 
 

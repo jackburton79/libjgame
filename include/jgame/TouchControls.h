@@ -5,8 +5,8 @@
  * buttons, touched with the fingers. Like a game controller (see Gamepad.h)
  * they press keys: Keyboard::IsKeyDown() and Keyboard::WasKeyPressed()
  * answer for them, so a game that reads the keyboard can be played on a touch
- * screen with no other change than drawing them (Draw(), once per frame,
- * before GraphicsEngine::Update()).
+ * screen with no other change than choosing where they are. GraphicsEngine
+ * draws them, half see-through, over the window each time it updates it.
  *
  * The stick is floating: a finger that comes down anywhere in its area is
  * its centre, and the way the finger goes from there holds the arrow keys,
@@ -20,16 +20,18 @@
  *
  * Several fingers at once are fine: one on the stick and others on buttons.
  *
- * The positions and the sizes are in the screen's pixels, the ones of
- * GraphicsEngine::ScreenBitmap(): the fingers are brought there however the
- * screen is scaled and centred in the window. A finger on a band at the side
- * of the screen (where the window is wider than the screen) counts as on its
- * edge. With no GraphicsEngine, the screen is the size UseDefaultLayout() was
- * given, and fills the window.
+ * Positions and sizes are in the screen's pixels, the ones of
+ * GraphicsEngine::ScreenBitmap(), but they are not kept inside the screen: a
+ * phone's is wider than the game's (4:3, say), and the window has bands at
+ * the sides where the game isn't. The controls can be there, out of the way,
+ * under the thumbs: they are drawn and touched in the window at its own
+ * resolution, and their positions can be less than 0 or more than the
+ * screen's size. VisibleArea() says what the window shows in screen pixels,
+ * bands included; lay the controls out on that.
  *
  * UseDefaultLayout() places the stick and buttons that stand for the keys a
- * game controller presses (see Gamepad.h): a game that works with a pad works
- * on a touch screen just as well.
+ * game controller presses (see Gamepad.h) at the edges of the visible area:
+ * a game that works with a pad works on a touch screen just as well.
  */
 #pragma once
 
@@ -39,10 +41,9 @@
 #include <string>
 
 union SDL_Event;
+struct SDL_Renderer;
 
 namespace jgame {
-
-class Bitmap;
 
 class TouchControls {
 public:
@@ -76,20 +77,29 @@ public:
 	// (KEY_NONE, the default, is nothing)
 	static void SetTapKey(Keyboard::Key key);
 
-	// Places a stick on the left half of a screen that is `width` by `height`
-	// pixels, and on the right the buttons of a game controller with the keys
-	// they stand for (see Gamepad.h): A (Space and Return), B (X), X (E) and
-	// Y (R), and a small Start (P) at the top. Replaces the stick and the
-	// buttons there were.
-	static void UseDefaultLayout(uint16 width, uint16 height);
+	// What the window shows, in screen pixels: the screen and the bands around
+	// it. x and y are less than 0 when there are bands on the left or above;
+	// the bottom right corner is (x + w, y + h). With no window yet, a screen
+	// of the size UseDefaultLayout() was given, from 0, 0.
+	static GFX::rect VisibleArea();
 
-	// Draws the stick and the buttons, half see-through, when IsActive()
-	static void Draw(Bitmap* target);
+	// Places a stick on the left half of the visible area, and on the right
+	// the buttons of a game controller with the keys they stand for (see
+	// Gamepad.h): A (Space and Return), B (X), X (E) and Y (R), and a small
+	// Start (P) at the top, all at the edges of the visible area. Replaces the
+	// stick and the buttons there were. `width` and `height` are the size of
+	// the screen, for when there is no window to ask yet. Call it again when
+	// VisibleArea() changes (the phone is turned).
+	static void UseDefaultLayout(uint16 width, uint16 height);
 
 private:
 	friend class Events;
 	friend class Keyboard;
+	friend class GraphicsEngine;
 	static void _BeginFrame();
+	// Draws the controls over the window; the screen is shown `scale` times as
+	// big, with its top left corner at (x, y), in the renderer's pixels
+	static void _Render(SDL_Renderer* renderer, float scale, float x, float y);
 	static void _HandleEvent(const union SDL_Event& event);
 	static bool _IsKeyDown(int key);
 };

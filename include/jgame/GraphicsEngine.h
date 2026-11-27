@@ -70,6 +70,18 @@ public:
 	void SaveCurrentMode();
 	void RestorePreviousMode();
 
+	// Where the screen is shown in the window: as big as it fits keeping its
+	// proportions, and centred, with bands at the sides (or above and below)
+	// where the window has another shape. All in the renderer's pixels, which
+	// are the window's on most systems and more on a high density display.
+	struct ScreenPlacement {
+		float scale;			// window pixels for each pixel of the screen
+		float x, y;				// where the screen's top left corner is
+		int outputWidth;		// the size of the window to show it in
+		int outputHeight;
+	};
+	ScreenPlacement Placement() const;
+
 	GFX::rect ScreenFrame() const;
 	void SetRenderingOffset(const GFX::point& point);
 
